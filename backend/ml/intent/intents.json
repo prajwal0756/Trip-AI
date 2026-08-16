@@ -1,0 +1,167 @@
+[
+  {"text":"I want a peaceful place to visit","intent":"recommendation"},
+  {"text":"Suggest a destination for my vacation","intent":"recommendation"},
+  {"text":"Recommend somewhere beautiful in Nepal","intent":"recommendation"},
+  {"text":"I want to visit a quiet mountain area","intent":"recommendation"},
+  {"text":"Find me a good place for trekking","intent":"recommendation"},
+  {"text":"I want an adventurous destination","intent":"recommendation"},
+  {"text":"Suggest a destination for my family","intent":"recommendation"},
+  {"text":"Where should I go for a relaxing trip","intent":"recommendation"},
+  {"text":"Find a peaceful destination away from crowds","intent":"recommendation"},
+  {"text":"I want somewhere with beautiful mountain views","intent":"recommendation"},
+  {"text":"Recommend a place for nature lovers","intent":"recommendation"},
+  {"text":"Where can I go for hiking and camping","intent":"recommendation"},
+  {"text":"Suggest a destination for a solo trip","intent":"recommendation"},
+  {"text":"I need an easy trekking destination","intent":"recommendation"},
+  {"text":"Find a destination for sunrise views","intent":"recommendation"},
+  {"text":"Show me historical places to visit","intent":"recommendation"},
+  {"text":"I want to visit cultural places","intent":"recommendation"},
+  {"text":"Find somewhere cheap for my trip","intent":"recommendation"},
+  {"text":"Suggest a place near Pokhara","intent":"recommendation"},
+  {"text":"I want to travel somewhere less crowded","intent":"recommendation"},
+  {"text":"Recommend somewhere for nature and adventure","intent":"recommendation"},
+  {"text":"Where can I go trekking near Kathmandu","intent":"recommendation"},
+  {"text":"Find a family friendly destination","intent":"recommendation"},
+  {"text":"Suggest a romantic destination","intent":"recommendation"},
+  {"text":"I want a relaxing lakeside destination","intent":"recommendation"},
+  {"text":"Show me some places where I can see sunrise","intent":"recommendation"},
+  {"text":"Where can I go to watch the sunrise","intent":"recommendation"},
+  {"text":"Find me a destination with sunrise views","intent":"recommendation"},
+  {"text":"Suggest places where I can see the sunrise","intent":"recommendation"},
+  {"text":"I want to visit a place famous for sunrise","intent":"recommendation"},
+  {"text":"Recommend somewhere with beautiful sunrise views","intent":"recommendation"},
+  {"text":"Where should I go for sunrise photography","intent":"recommendation"},
+  {"text":"Find a good sunrise destination in Nepal","intent":"recommendation"},
+  {"text":"I want a quiet and peaceful destination","intent":"recommendation"},
+  {"text":"Find somewhere less crowded","intent":"recommendation"},
+  {"text":"I want a calm place in nature","intent":"recommendation"},
+  {"text":"Suggest a peaceful destination","intent":"recommendation"},
+  {"text":"Where should I go for a relaxing trip","intent":"recommendation"},
+  {"text":"Find me a place away from busy cities","intent":"recommendation"},
+
+  {"text":"What activities can I do in Pokhara","intent":"activity_search"},
+  {"text":"What can I do when visiting Chitwan","intent":"activity_search"},
+  {"text":"Show me activities available in Pokhara","intent":"activity_search"},
+  {"text":"What activities are available in Nepal","intent":"activity_search"},
+  {
+    "text": "What activities can I do in Pokhara?",
+    "intent": "activity_search"
+  },
+  {
+    "text": "What can I do at Phewa Lake?",
+    "intent": "activity_search"
+  },
+  {
+    "text": "Show me trekking activities",
+    "intent": "activity_search"
+  },
+  {
+    "text": "Where can I go hiking?",
+    "intent": "activity_search"
+  },
+  {
+    "text": "I want places for paragliding",
+    "intent": "activity_search"
+  },
+  {
+    "text": "Where can I go rafting?",
+    "intent": "activity_search"
+  },
+  {
+    "text": "Show me places for photography",
+    "intent": "activity_search"
+  },
+  {
+    "text": "Where can I see sunrise?",
+    "intent": "activity_search"
+  },
+  {
+    "text": "What activities are available in Chitwan?",
+    "intent": "activity_search"
+  },
+  {
+    "text": "Where can I go camping?",
+    "intent": "activity_search"
+  },
+  {
+    "text": "Find destinations where I can trek",
+    "intent": "activity_search"
+  },
+  {
+    "text": "Where can I do mountain photography?",
+    "intent": "activity_search"
+  },
+
+  {"text":"Show me destinations similar to Pokhara","intent":"similar_destination"},
+  {"text":"What places are similar to Pokhara","intent":"similar_destination"},
+  {"text":"Find alternatives to Pokhara","intent":"similar_destination"},
+  {"text":"Show me places like Chitwan","intent":"similar_destination"},
+  {"text":"What destination is similar to Mustang","intent":"similar_destination"},
+  {"text":"Give me destinations like Phewa Lake","intent":"similar_destination"},
+  {"text":"Where can I go instead of Pokhara","intent":"similar_destination"},
+  {"text":"Find a place similar to Annapurna Base Camp","intent":"similar_destination"},
+  {"text":"I want alternatives to Chitwan National Park","intent":"similar_destination"},
+  {"text":"Suggest places like Sarangkot","intent":"similar_destination"},
+  {"text":"What are some similar destinations to Lumbini","intent":"similar_destination"},
+  {"text":"Find destinations comparable to Pokhara","intent":"similar_destination"},
+  {"text":"Show me other places like Poon Hill","intent":"similar_destination"},
+  {"text":"I want something similar to Bandipur","intent":"similar_destination"},
+  {"text":"Can you find destinations like Nagarkot","intent":"similar_destination"},
+
+  {"text":"Tell me about Pokhara","intent":"destination_information"},
+  {"text":"What is special about Mustang","intent":"destination_information"},
+  {"text":"Give me information about Phewa Lake","intent":"destination_information"},
+  {"text":"Tell me about Annapurna Base Camp","intent":"destination_information"},
+  {"text":"What can you tell me about Chitwan National Park","intent":"destination_information"},
+  {"text":"Give me details about Lumbini","intent":"destination_information"},
+  {"text":"What is Sarangkot known for","intent":"destination_information"},
+  {"text":"Tell me about Bandipur","intent":"destination_information"},
+  {"text":"I want information about Nagarkot","intent":"destination_information"},
+  {"text":"What should I know about Poon Hill","intent":"destination_information"},
+  {"text":"Explain what makes Pokhara popular","intent":"destination_information"},
+  {"text":"What can I see in Mustang","intent":"destination_information"},
+  {"text":"Give me details about Chitwan","intent":"destination_information"},
+  {"text":"Tell me about Lumbini","intent":"destination_information"},
+  {"text":"What is interesting about Bhaktapur","intent":"destination_information"},
+
+  {"text":"Where can I stay in Pokhara","intent":"accommodation_search"},
+  {"text":"Find accommodation in Chitwan","intent":"accommodation_search"},
+  {"text":"Where should I stay in Kathmandu","intent":"accommodation_search"},
+  {"text":"Find a homestay in Pokhara","intent":"accommodation_search"},
+  {"text":"Show me places to stay near Annapurna","intent":"accommodation_search"},
+  {"text":"I need accommodation in Mustang","intent":"accommodation_search"},
+  {"text":"Find hotels near Chitwan National Park","intent":"accommodation_search"},
+  {"text":"Where can I stay near Phewa Lake","intent":"accommodation_search"},
+  {"text":"Show me homestays in Nepal","intent":"accommodation_search"},
+  {"text":"I need somewhere to stay in Bandipur","intent":"accommodation_search"},
+  {"text":"Find a place to stay in Nagarkot","intent":"accommodation_search"},
+  {"text":"Where can tourists stay in Lumbini","intent":"accommodation_search"},
+  {"text":"I am looking for accommodation near Pokhara","intent":"accommodation_search"},
+  {"text":"Show me lodging options in Kathmandu","intent":"accommodation_search"},
+  {"text":"Find somewhere to sleep in Chitwan","intent":"accommodation_search"},
+
+  {"text":"Show me destinations in Gandaki","intent":"destination_search"},
+  {"text":"List destinations in Kaski","intent":"destination_search"},
+  {"text":"Show me places in Bagmati","intent":"destination_search"},
+  {"text":"Find destinations in Nepal","intent":"destination_search"},
+  {"text":"List places to visit in Kathmandu district","intent":"destination_search"},
+  {"text":"Show me destinations in Mustang district","intent":"destination_search"},
+  {"text":"Find tourist destinations in Gandaki Province","intent":"destination_search"},
+  {"text":"Show me places in Pokhara","intent":"destination_search"},
+  {"text":"List destinations in Chitwan","intent":"destination_search"},
+  {"text":"What destinations are available in Nepal","intent":"destination_search"},
+  {"text":"Show me all destinations in Kaski","intent":"destination_search"},
+  {"text":"Find places to visit in Bagmati","intent":"destination_search"},
+  {"text":"Give me a list of Nepal destinations","intent":"destination_search"},
+  {"text":"What places can I visit in Gandaki","intent":"destination_search"},
+  {"text":"Show destinations around Kathmandu","intent":"destination_search"},
+
+  {"text":"Hello","intent":"greeting"},
+  {"text":"Hi","intent":"greeting"},
+  {"text":"Hey TripAI","intent":"greeting"},
+  {"text":"Hello TripAI","intent":"greeting"},
+  {"text":"Hi there","intent":"greeting"},
+  {"text":"Hey","intent":"greeting"},
+  {"text":"Good morning","intent":"greeting"},
+  {"text":"Good evening","intent":"greeting"}
+]

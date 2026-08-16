@@ -1,0 +1,36 @@
+# FastAPI
+fastapi==0.139.2
+uvicorn==0.51.0
+
+
+# Database
+SQLAlchemy==2.0.51
+psycopg2-binary
+
+
+# Configuration
+python-dotenv==1.2.2
+pydantic==2.13.4
+pydantic-settings
+
+
+# Authentication
+python-jose==3.5.0
+passlib==1.7.4
+bcrypt==5.0.0
+python-multipart==0.0.32
+
+
+# Validation
+email-validator==2.3.0
+
+
+# AI / ML
+numpy
+pandas
+scikit-learn
+sentence-transformers
+
+
+# Utilities
+greenlet
