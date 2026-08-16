@@ -154,10 +154,10 @@ export default function DestinationDetails() {
     <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
 
       {/* =====================================
-          IMAGE
+          IMAGE / PLACEHOLDER
       ===================================== */}
 
-      <div className="overflow-hidden rounded-2xl bg-sand-100">
+      <div className="overflow-hidden rounded-2xl">
 
         {hasImages ? (
           <img
@@ -166,19 +166,40 @@ export default function DestinationDetails() {
             className="h-72 w-full object-cover sm:h-96"
           />
         ) : (
-          <div className="flex h-72 items-center justify-center sm:h-96">
-            <div className="text-center">
-              <FaMapMarkerAlt
-                className="mx-auto text-3xl text-terracotta-500"
-              />
+          /*
+           * Temporary placeholder until destination
+           * images are available.
+           */
+          <div className="relative flex h-72 items-center justify-center overflow-hidden bg-gradient-to-br from-[#173446] via-[#102631] to-[#0B1117] sm:h-96">
 
-              <p className="mt-3 font-display text-xl font-medium text-ink-900">
+            {/* Decorative glow */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(225,123,72,0.18),_transparent_60%)]" />
+
+            {/* Subtle border */}
+            <div className="absolute inset-0 rounded-2xl border border-white/10" />
+
+            {/* Placeholder content */}
+            <div className="relative z-10 px-6 text-center">
+
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-500/15 ring-1 ring-terracotta-400/20">
+                <FaMapMarkerAlt
+                  className="text-terracotta-400"
+                  size={26}
+                />
+              </div>
+
+              <p className="mt-5 font-display text-2xl font-semibold text-white">
                 {destination.destination_name}
               </p>
 
-              <p className="mt-1 text-sm text-ink-500">
+              <p className="mt-2 text-sm text-slate-300">
                 {destination.district}, {destination.province}
               </p>
+
+              <p className="mt-4 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
+                Destination
+              </p>
+
             </div>
           </div>
         )}
@@ -216,11 +237,11 @@ export default function DestinationDetails() {
 
         <div>
 
-          <h1 className="font-display text-3xl font-medium text-ink-900">
+          <h1 className="font-display text-3xl font-medium text-white">
             {destination.destination_name}
           </h1>
 
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-500">
+          <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-400">
             <FaMapMarkerAlt size={12} />
 
             {destination.district}, {destination.province}
@@ -239,7 +260,7 @@ export default function DestinationDetails() {
           onClick={() =>
             toggleFavoriteDestination(destinationId)
           }
-          className="flex items-center gap-2 rounded-xl border border-ink-900/10 px-4 py-2.5 text-sm font-medium text-terracotta-500 hover:bg-sand-100"
+          className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-terracotta-400 transition-colors hover:bg-white/5"
         >
           {isFavorite ? (
             <FaHeart />
@@ -256,14 +277,14 @@ export default function DestinationDetails() {
           QUICK FACTS
       ===================================== */}
 
-      <div className="mt-6 flex flex-wrap gap-4 rounded-2xl bg-white p-5 shadow-sm">
+      <div className="mt-6 flex flex-wrap gap-4 rounded-2xl bg-[#121C27] p-5 shadow-sm">
 
-        <div className="flex items-center gap-2 text-sm text-ink-700">
-          <FaWallet className="text-teal-700" />
+        <div className="flex items-center gap-2 text-sm text-slate-300">
+          <FaWallet className="text-teal-500" />
 
           Est. budget:
 
-          <span className="font-medium">
+          <span className="font-medium text-white">
             NPR{' '}
             {Number(
               destination.estimated_budget_npr || 0
@@ -271,23 +292,23 @@ export default function DestinationDetails() {
           </span>
         </div>
 
-        <div className="flex items-center gap-2 text-sm text-ink-700">
-          <FaCalendarAlt className="text-teal-700" />
+        <div className="flex items-center gap-2 text-sm text-slate-300">
+          <FaCalendarAlt className="text-teal-500" />
 
           Best time:
 
-          <span className="font-medium">
+          <span className="font-medium text-white">
             {destination.best_season || 'Year-round'}
           </span>
         </div>
 
         {destination.average_duration_days && (
-          <div className="flex items-center gap-2 text-sm text-ink-700">
-            <FaCalendarAlt className="text-teal-700" />
+          <div className="flex items-center gap-2 text-sm text-slate-300">
+            <FaCalendarAlt className="text-teal-500" />
 
             Duration:
 
-            <span className="font-medium">
+            <span className="font-medium text-white">
               {destination.average_duration_days} days
             </span>
           </div>
@@ -295,12 +316,12 @@ export default function DestinationDetails() {
 
         {destination.family_friendly !== undefined &&
           destination.family_friendly !== null && (
-            <div className="flex items-center gap-2 text-sm text-ink-700">
-              <FaUsers className="text-teal-700" />
+            <div className="flex items-center gap-2 text-sm text-slate-300">
+              <FaUsers className="text-teal-500" />
 
               Family friendly:
 
-              <span className="font-medium">
+              <span className="font-medium text-white">
                 {String(destination.family_friendly)}
               </span>
             </div>
@@ -334,7 +355,7 @@ export default function DestinationDetails() {
       {categories.length > 0 && (
         <div className="mt-6">
 
-          <h2 className="font-display text-xl font-medium text-ink-900">
+          <h2 className="font-display text-xl font-medium text-white">
             Categories
           </h2>
 
@@ -360,11 +381,11 @@ export default function DestinationDetails() {
 
       <div className="mt-8">
 
-        <h2 className="font-display text-xl font-medium text-ink-900">
+        <h2 className="font-display text-xl font-medium text-white">
           About {destination.destination_name}
         </h2>
 
-        <p className="mt-3 text-sm leading-relaxed text-ink-700">
+        <p className="mt-3 text-sm leading-relaxed text-slate-400">
           {destination.description ||
             'Explore this destination and discover what makes it special.'}
         </p>
@@ -378,7 +399,7 @@ export default function DestinationDetails() {
       {activities.length > 0 && (
         <div className="mt-8">
 
-          <h2 className="font-display text-xl font-medium text-ink-900">
+          <h2 className="font-display text-xl font-medium text-white">
             Things to do
           </h2>
 
@@ -387,28 +408,29 @@ export default function DestinationDetails() {
             {activities.map((activity) => (
               <div
                 key={activity.activity_id}
-                className="rounded-xl bg-white p-4 shadow-sm"
+                className="rounded-xl bg-[#121C27] p-4 shadow-sm"
               >
 
                 <div className="flex items-center gap-2">
 
                   <FaCheckCircle
-                    className="shrink-0 text-forest-500"
+                    className="shrink-0 text-emerald-500"
                     size={14}
                   />
 
-                  <span className="text-sm font-medium text-ink-900">
+                  <span className="text-sm font-medium text-white">
                     {activity.activities}
                   </span>
 
                 </div>
 
                 {activity.difficulty_level && (
-                  <p className="mt-2 flex items-center gap-2 text-xs text-ink-500">
+                  <p className="mt-2 flex items-center gap-2 text-xs text-slate-400">
                     <FaHiking size={11} />
 
                     Difficulty:
-                    <span className="font-medium">
+
+                    <span className="font-medium text-slate-300">
                       {activity.difficulty_level}
                     </span>
                   </p>
@@ -428,17 +450,32 @@ export default function DestinationDetails() {
 
       <div className="mt-8">
 
-        <h2 className="font-display text-xl font-medium text-ink-900">
+        <h2 className="font-display text-xl font-medium text-white">
           Location
         </h2>
 
-        <div className="mt-3 flex h-56 items-center justify-center rounded-2xl bg-sand-200 text-sm text-ink-500">
+        <div className="relative mt-3 flex h-56 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#173446] via-[#102631] to-[#0B1117] text-sm text-slate-300">
 
-          <FaMapMarkerAlt className="mr-2" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(225,123,72,0.12),_transparent_65%)]" />
 
-          {destination.destination_name},{' '}
-          {destination.district},{' '}
-          {destination.province}
+          <div className="relative z-10 flex flex-col items-center text-center">
+
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-terracotta-500/15">
+              <FaMapMarkerAlt
+                className="text-terracotta-400"
+                size={20}
+              />
+            </div>
+
+            <p className="mt-3 font-medium text-white">
+              {destination.destination_name}
+            </p>
+
+            <p className="mt-1 text-xs text-slate-400">
+              {destination.district}, {destination.province}
+            </p>
+
+          </div>
 
         </div>
 
@@ -450,13 +487,13 @@ export default function DestinationDetails() {
 
       <div className="mt-10">
 
-        <h2 className="font-display text-xl font-medium text-ink-900">
+        <h2 className="font-display text-xl font-medium text-white">
           Nearby homestays
         </h2>
 
         {nearbyHomestays.length === 0 ? (
 
-          <p className="mt-3 text-sm text-ink-500">
+          <p className="mt-3 text-sm text-slate-400">
             No homestays listed near this destination yet.
           </p>
 
@@ -483,13 +520,13 @@ export default function DestinationDetails() {
 
       <div className="mt-10">
 
-        <h2 className="font-display text-xl font-medium text-ink-900">
+        <h2 className="font-display text-xl font-medium text-white">
           Traveler reviews
         </h2>
 
         {destinationReviews.length === 0 ? (
 
-          <p className="mt-3 text-sm text-ink-500">
+          <p className="mt-3 text-sm text-slate-400">
             No reviews yet for this destination.
           </p>
 
