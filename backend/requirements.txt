@@ -23,14 +23,17 @@ python-multipart==0.0.32
 
 # Validation
 email-validator==2.3.0
-
+scipy
 
 # AI / ML
 numpy
 pandas
 scikit-learn
 sentence-transformers
-
+transformers
+torch
+huggingface-hub
 
 # Utilities
 greenlet
+openpyxl
