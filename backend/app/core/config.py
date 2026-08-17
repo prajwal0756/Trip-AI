@@ -1,21 +1,13 @@
-# from dotenv import load_dotenv
-# import os
+from pathlib import Path
 
-# # Load environment variables from backend/.env
-# load_dotenv()
-
-# DATABASE_URL = os.getenv("DATABASE_URL")
-
-# SECRET_KEY = os.getenv("SECRET_KEY")
-
-# ALGORITHM = os.getenv("ALGORITHM")
-
-# ACCESS_TOKEN_EXPIRE_MINUTES = int(
-#     os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES")
-# )
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-from pydantic_settings import BaseSettings
+# backend/
+BASE_DIR = Path(__file__).resolve().parents[2]
+
+# backend/.env
+ENV_FILE = BASE_DIR / ".env"
 
 
 class Settings(BaseSettings):
@@ -28,20 +20,24 @@ class Settings(BaseSettings):
 
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-
-    class Config:
-        env_file = ".env"
-
+    model_config = SettingsConfigDict(
+        env_file=ENV_FILE,
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
 
 settings = Settings()
 
 
 # Compatibility for old imports
+
 DATABASE_URL = settings.DATABASE_URL
 
 SECRET_KEY = settings.SECRET_KEY
 
 ALGORITHM = settings.ALGORITHM
 
-ACCESS_TOKEN_EXPIRE_MINUTES = settings.ACCESS_TOKEN_EXPIRE_MINUTES
+ACCESS_TOKEN_EXPIRE_MINUTES = (
+    settings.ACCESS_TOKEN_EXPIRE_MINUTES
+)

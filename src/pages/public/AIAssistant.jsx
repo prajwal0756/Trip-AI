@@ -1,0 +1,945 @@
+import { useState } from 'react'
+import {
+  FaMagic,
+  FaPaperPlane,
+  FaMapMarkerAlt,
+  FaStar,
+  FaWallet,
+  FaCalendarAlt,
+  FaRoute,
+  FaCheckCircle,
+} from 'react-icons/fa'
+import { Link } from 'react-router-dom'
+import api from '../../api/client'
+
+export default function AIAssistant() {
+  const [query, setQuery] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [results, setResults] = useState([])
+  const [aiResponse, setAiResponse] = useState(null)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    const trimmedQuery = query.trim()
+
+    if (!trimmedQuery || loading) return
+
+    try {
+      setLoading(true)
+      setError('')
+      setResults([])
+      setAiResponse(null)
+
+      const response = await api.post('/ai/query', {
+        query: trimmedQuery,
+      })
+
+      const data = response.data || {}
+
+      setAiResponse(data)
+
+      const recommendations = Array.isArray(data.results)
+        ? data.results
+        : []
+
+      setResults(recommendations)
+    } catch (err) {
+      console.error('AI recommendation error:', err)
+
+      setError(
+        err.response?.data?.detail ||
+          'Unable to find destinations right now. Please try again.'
+      )
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleExample = (example) => {
+    setQuery(example)
+  }
+
+  return (
+    <div className="min-h-screen bg-[#0B1117] text-white">
+
+      {/* =========================================
+          HEADER
+      ========================================= */}
+
+      <header className="border-b border-white/10 bg-[#0B1117]/95">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-5 lg:px-8">
+
+          <Link
+            to="/"
+            className="font-display text-2xl font-bold"
+          >
+            Trip<span className="text-terracotta-400">AI</span>
+          </Link>
+
+          <Link
+            to="/destinations"
+            className="rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-300 transition hover:border-white/20 hover:text-white"
+          >
+            Explore destinations
+          </Link>
+
+        </div>
+      </header>
+
+
+      {/* =========================================
+          MAIN
+      ========================================= */}
+
+      <main className="mx-auto max-w-6xl px-5 py-12 lg:px-8">
+
+        {/* =========================================
+            HERO
+        ========================================= */}
+
+        <section className="mx-auto max-w-3xl text-center">
+
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-terracotta-500 text-white shadow-lg">
+            <FaMagic size={23} />
+          </div>
+
+          <p className="mt-5 text-sm font-semibold uppercase tracking-[0.2em] text-terracotta-400">
+            AI-powered travel discovery
+          </p>
+
+          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight text-white sm:text-5xl">
+            TripAI Assistant
+          </h1>
+
+          <p className="mx-auto mt-4 max-w-2xl text-base leading-7 text-slate-400">
+            Tell TripAI what kind of trip you want in your own words.
+            Our AI understands your preferences and finds destinations
+            across Nepal that best match them.
+          </p>
+
+        </section>
+
+
+        {/* =========================================
+            PROMPT
+        ========================================= */}
+
+        <section className="mx-auto mt-10 max-w-4xl">
+
+          <form
+            onSubmit={handleSubmit}
+            className="rounded-2xl border border-white/10 bg-[#111B28] p-3 shadow-2xl"
+          >
+
+            <textarea
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              disabled={loading}
+              rows={4}
+              placeholder="Example: I want a peaceful 3-day trip near Pokhara with mountain views, local food and easy activities."
+              className="w-full resize-none rounded-xl border-0 bg-transparent px-4 py-3 text-base leading-7 text-white outline-none placeholder:text-slate-500 disabled:opacity-60"
+            />
+
+            <div className="mt-2 flex flex-col gap-3 border-t border-white/10 pt-3 sm:flex-row sm:items-center sm:justify-between">
+
+              <p className="px-2 text-xs text-slate-500">
+                Describe your location, duration, interests,
+                budget, activities, or travel style.
+              </p>
+
+              <button
+                type="submit"
+                disabled={!query.trim() || loading}
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-terracotta-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-terracotta-600 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {loading ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Finding destinations...
+                  </>
+                ) : (
+                  <>
+                    <FaPaperPlane size={12} />
+                    Find destinations
+                  </>
+                )}
+              </button>
+
+            </div>
+
+          </form>
+
+
+          {/* Example prompts */}
+
+          <div className="mt-4 flex flex-wrap justify-center gap-2">
+
+            {[
+              'Peaceful trip near Pokhara',
+              'Adventure and trekking',
+              'Family trip with nature',
+              'Cultural places and local food',
+            ].map((example) => (
+              <button
+                key={example}
+                type="button"
+                onClick={() => handleExample(example)}
+                disabled={loading}
+                className="cursor-pointer rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-slate-400 transition hover:border-white/20 hover:bg-white/10 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {example}
+              </button>
+            ))}
+
+          </div>
+
+        </section>
+
+
+        {/* =========================================
+            ERROR
+        ========================================= */}
+
+        {error && (
+          <div className="mx-auto mt-8 max-w-4xl rounded-xl border border-red-500/20 bg-red-500/10 px-5 py-4 text-sm text-red-300">
+            {error}
+          </div>
+        )}
+
+
+        {/* =========================================
+            AI UNDERSTANDING
+        ========================================= */}
+
+        {aiResponse?.response_type === 'recommendation' &&
+          aiResponse?.nlp && (
+            <AIUnderstanding
+              nlp={aiResponse.nlp}
+              resultCount={results.length}
+            />
+          )}
+
+
+        {/* =========================================
+            RESULTS
+        ========================================= */}
+
+        {results.length > 0 && (
+          <section className="mt-12">
+
+            <div className="mb-7 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+
+              <div>
+
+                <div className="flex items-center gap-2">
+
+                  <FaMagic
+                    size={15}
+                    className="text-terracotta-400"
+                  />
+
+                  <h2 className="font-display text-2xl font-semibold">
+                    Recommended for you
+                  </h2>
+
+                </div>
+
+                <p className="mt-1 text-sm text-slate-400">
+                  Destinations ranked according to the preferences
+                  understood from your request.
+                </p>
+
+              </div>
+
+              <span className="text-sm text-slate-500">
+                {results.length} destination
+                {results.length !== 1 ? 's' : ''} found
+              </span>
+
+            </div>
+
+
+            {/* Top recommendation */}
+
+            {results[0] && (
+              <TopRecommendation
+                destination={results[0]}
+                nlp={aiResponse?.nlp}
+              />
+            )}
+
+
+            {/* Remaining recommendations */}
+
+            {results.length > 1 && (
+              <div className="mt-7 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+                {results.slice(1).map((destination, index) => (
+                  <AIDestinationCard
+                    key={
+                      destination.destination_id ||
+                      destination.id ||
+                      index
+                    }
+                    destination={destination}
+                    nlp={aiResponse?.nlp}
+                  />
+                ))}
+
+              </div>
+            )}
+
+          </section>
+        )}
+
+
+        {/* =========================================
+            SPECIAL AI RESPONSES
+        ========================================= */}
+
+        {!loading &&
+          aiResponse &&
+          results.length === 0 &&
+          aiResponse.message && (
+            <section className="mx-auto mt-12 max-w-2xl rounded-2xl border border-white/10 bg-[#111B28] p-7 text-center">
+
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-terracotta-400">
+                <FaMagic />
+              </div>
+
+              <p className="mt-4 text-base leading-7 text-slate-300">
+                {aiResponse.message}
+              </p>
+
+            </section>
+          )}
+
+
+        {/* =========================================
+            EMPTY STATE
+        ========================================= */}
+
+        {!loading &&
+          !error &&
+          !aiResponse && (
+            <section className="mx-auto mt-16 max-w-2xl text-center">
+
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-white/5 text-slate-500">
+                <FaMapMarkerAlt />
+              </div>
+
+              <p className="mt-4 text-sm text-slate-500">
+                Your AI-matched destinations will appear here.
+              </p>
+
+            </section>
+          )}
+
+      </main>
+
+    </div>
+  )
+}
+
+
+/* =====================================================
+   AI UNDERSTANDING
+===================================================== */
+
+function AIUnderstanding({ nlp, resultCount }) {
+
+  const location =
+    nlp.location ||
+    nlp.destination ||
+    null
+
+  const activities = Array.isArray(nlp.activities)
+    ? nlp.activities
+    : []
+
+  const moodTags = Array.isArray(nlp.mood_tags)
+    ? nlp.mood_tags
+    : []
+
+  const budget = nlp.budget_npr
+  const duration = nlp.duration_days
+  const groupType = nlp.group_type
+
+  const hasPreferences =
+    location ||
+    activities.length > 0 ||
+    moodTags.length > 0 ||
+    budget ||
+    duration ||
+    groupType
+
+  if (!hasPreferences) return null
+
+  return (
+    <section className="mx-auto mt-10 max-w-4xl">
+
+      <div className="rounded-2xl border border-terracotta-500/20 bg-terracotta-500/5 p-5">
+
+        <div className="flex items-start gap-3">
+
+          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-terracotta-500/10 text-terracotta-400">
+            <FaMagic size={14} />
+          </div>
+
+          <div className="min-w-0 flex-1">
+
+            <h3 className="text-sm font-semibold text-white">
+              TripAI understood your request
+            </h3>
+
+            <p className="mt-1 text-xs leading-5 text-slate-400">
+              We used these preferences to rank {resultCount || 'the'} destination
+              {resultCount === 1 ? '' : 's'}.
+            </p>
+
+
+            <div className="mt-4 flex flex-wrap gap-2">
+
+              {location && (
+                <PreferencePill>
+                  <FaMapMarkerAlt size={10} />
+                  {location}
+                </PreferencePill>
+              )}
+
+              {duration && (
+                <PreferencePill>
+                  <FaCalendarAlt size={10} />
+                  {duration} day{Number(duration) === 1 ? '' : 's'}
+                </PreferencePill>
+              )}
+
+              {budget && (
+                <PreferencePill>
+                  <FaWallet size={10} />
+                  Up to NPR {Number(budget).toLocaleString()}
+                </PreferencePill>
+              )}
+
+              {groupType && (
+                <PreferencePill>
+                  <FaRoute size={10} />
+                  {groupType}
+                </PreferencePill>
+              )}
+
+              {activities.map((activity) => (
+                <PreferencePill key={`activity-${activity}`}>
+                  <FaCheckCircle size={10} />
+                  {activity}
+                </PreferencePill>
+              ))}
+
+              {moodTags.map((mood) => (
+                <PreferencePill key={`mood-${mood}`}>
+                  ✨ {mood}
+                </PreferencePill>
+              ))}
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+  )
+}
+
+
+/* =====================================================
+   PREFERENCE PILL
+===================================================== */
+
+function PreferencePill({ children }) {
+
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-slate-300">
+      <span className="text-teal-400">
+        {children}
+      </span>
+    </span>
+  )
+}
+
+
+/* =====================================================
+   TOP RECOMMENDATION
+===================================================== */
+
+function TopRecommendation({ destination, nlp }) {
+
+  const name =
+    destination.destination_name ||
+    destination.name ||
+    'Destination'
+
+  const id =
+    destination.destination_id ||
+    destination.id
+
+  const province =
+    destination.province || ''
+
+  const district =
+    destination.district || ''
+
+  const rating =
+    Number(
+      destination.average_rating ||
+      destination.rating ||
+      0
+    )
+
+  const budget =
+    Number(
+      destination.estimated_budget_npr ||
+      destination.estimatedBudget ||
+      0
+    )
+
+  const similarity =
+    Number(
+      destination.similarity_score ||
+      destination.similarity ||
+      0
+    )
+
+  const finalScore =
+    Number(
+      destination.final_score ||
+      0
+    )
+
+  const description =
+    destination.description ||
+    'A destination selected by TripAI based on your travel request.'
+
+  const activities = parseList(
+    destination.activities
+  )
+
+  return (
+    <article className="relative overflow-hidden rounded-3xl border border-terracotta-500/20 bg-[#111B28] shadow-xl">
+
+      <div className="absolute right-0 top-0 h-48 w-48 rounded-full bg-terracotta-500/10 blur-3xl" />
+
+      <div className="relative grid lg:grid-cols-[0.9fr_1.1fr]">
+
+        {/* Visual */}
+
+        <div className="flex min-h-[270px] items-center justify-center bg-gradient-to-br from-[#183344] via-[#102432] to-[#0B1117] p-8">
+
+          <div className="text-center">
+
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-terracotta-400">
+              <FaMapMarkerAlt size={24} />
+            </div>
+
+            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-terracotta-400">
+              Top AI match
+            </p>
+
+            <h3 className="mt-2 font-display text-3xl font-semibold text-white">
+              {name}
+            </h3>
+
+            <p className="mt-2 text-sm text-slate-400">
+              {district}
+              {district && province ? ', ' : ''}
+              {province}
+            </p>
+
+          </div>
+
+        </div>
+
+
+        {/* Content */}
+
+        <div className="p-7 sm:p-8">
+
+          <div className="flex flex-wrap items-start justify-between gap-4">
+
+            <div>
+
+              <p className="text-xs font-semibold uppercase tracking-[0.15em] text-teal-400">
+                Best match
+              </p>
+
+              <h3 className="mt-1 font-display text-2xl font-semibold text-white">
+                {name}
+              </h3>
+
+            </div>
+
+            <div className="rounded-xl border border-teal-500/20 bg-teal-500/10 px-3 py-2 text-center">
+
+              <div className="text-xl font-bold text-teal-300">
+                {getMatchPercentage(
+                  similarity,
+                  finalScore
+                )}%
+              </div>
+
+              <div className="text-[10px] uppercase tracking-wide text-slate-500">
+                match
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <div className="mt-5 flex flex-wrap gap-2">
+
+            <InfoPill icon={<FaStar />} value={rating.toFixed(1)} />
+
+            {budget > 0 && (
+              <InfoPill
+                icon={<FaWallet />}
+                value={`NPR ${budget.toLocaleString()}`}
+              />
+            )}
+
+            {destination.best_season && (
+              <InfoPill
+                icon={<FaCalendarAlt />}
+                value={destination.best_season}
+              />
+            )}
+
+          </div>
+
+
+          <p className="mt-5 text-sm leading-7 text-slate-300">
+            {description}
+          </p>
+
+
+          {activities.length > 0 && (
+            <div className="mt-5">
+
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Activities
+              </p>
+
+              <div className="mt-2 flex flex-wrap gap-2">
+
+                {activities.slice(0, 5).map((activity) => (
+                  <span
+                    key={activity}
+                    className="rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-slate-300"
+                  >
+                    {activity}
+                  </span>
+                ))}
+
+              </div>
+
+            </div>
+          )}
+
+
+          <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+
+            {id && (
+              <Link
+                to={`/destination/${id}`}
+                className="inline-flex flex-1 items-center justify-center rounded-xl bg-terracotta-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-terracotta-600"
+              >
+                Explore destination →
+              </Link>
+            )}
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </article>
+  )
+}
+
+
+/* =====================================================
+   NORMAL AI CARD
+===================================================== */
+
+function AIDestinationCard({ destination, nlp }) {
+
+  const name =
+    destination.destination_name ||
+    destination.name ||
+    'Destination'
+
+  const id =
+    destination.destination_id ||
+    destination.id
+
+  const province =
+    destination.province || ''
+
+  const district =
+    destination.district || ''
+
+  const rating =
+    Number(
+      destination.average_rating ||
+      destination.rating ||
+      0
+    )
+
+  const budget =
+    Number(
+      destination.estimated_budget_npr ||
+      destination.estimatedBudget ||
+      0
+    )
+
+  const similarity =
+    Number(
+      destination.similarity_score ||
+      destination.similarity ||
+      0
+    )
+
+  const finalScore =
+    Number(
+      destination.final_score ||
+      0
+    )
+
+  const description =
+    destination.description ||
+    'A destination selected by TripAI based on your travel request.'
+
+  const activities = parseList(
+    destination.activities
+  )
+
+  return (
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#111B28] transition duration-300 hover:-translate-y-1 hover:border-terracotta-400/40 hover:shadow-xl">
+
+      {/* Placeholder visual */}
+
+      <div className="relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br from-[#183344] via-[#102432] to-[#0B1117]">
+
+        <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-teal-500/20 blur-3xl" />
+
+        <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-terracotta-500/20 blur-3xl" />
+
+        <div className="relative text-center">
+
+          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-terracotta-400">
+            <FaMapMarkerAlt />
+          </div>
+
+          <h3 className="mt-3 font-display text-xl font-semibold text-white">
+            {name}
+          </h3>
+
+          <p className="mt-1 text-sm text-slate-400">
+            {district}
+            {district && province ? ', ' : ''}
+            {province}
+          </p>
+
+        </div>
+
+      </div>
+
+
+      <div className="flex flex-1 flex-col p-5">
+
+        <div className="flex items-start justify-between gap-3">
+
+          <div>
+
+            <h3 className="font-display text-lg font-semibold text-white">
+              {name}
+            </h3>
+
+            <p className="mt-1 text-sm text-slate-400">
+              {district}
+              {district && province ? ', ' : ''}
+              {province}
+            </p>
+
+          </div>
+
+          <div className="flex items-center gap-1 text-sm font-semibold text-white">
+
+            <FaStar
+              size={12}
+              className="text-terracotta-400"
+            />
+
+            {rating.toFixed(1)}
+
+          </div>
+
+        </div>
+
+
+        <div className="mt-4 flex flex-wrap gap-2">
+
+          {budget > 0 && (
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-slate-300">
+
+              <FaWallet
+                size={10}
+                className="text-teal-400"
+              />
+
+              NPR {budget.toLocaleString()}
+
+            </span>
+          )}
+
+          {destination.best_season && (
+            <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-slate-300">
+
+              <FaCalendarAlt
+                size={10}
+                className="text-teal-400"
+              />
+
+              {destination.best_season}
+
+            </span>
+          )}
+
+        </div>
+
+
+        {activities.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-1.5">
+
+            {activities.slice(0, 3).map((activity) => (
+              <span
+                key={activity}
+                className="rounded-md bg-teal-500/5 px-2 py-1 text-[11px] text-teal-300"
+              >
+                {activity}
+              </span>
+            ))}
+
+          </div>
+        )}
+
+
+        <p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-400">
+          {description}
+        </p>
+
+
+        <div className="mt-4 flex items-center justify-between">
+
+          <span className="text-xs font-medium text-teal-300">
+            ✨ {getMatchPercentage(
+              similarity,
+              finalScore
+            )}% preference match
+          </span>
+
+        </div>
+
+
+        {id && (
+          <Link
+            to={`/destination/${id}`}
+            className="mt-5 inline-flex w-full items-center justify-center rounded-xl bg-terracotta-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-terracotta-600"
+          >
+            Explore destination →
+          </Link>
+        )}
+
+      </div>
+
+    </article>
+  )
+}
+
+
+/* =====================================================
+   INFO PILL
+===================================================== */
+
+function InfoPill({ icon, value }) {
+
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-3 py-2 text-xs text-slate-300">
+
+      <span className="text-teal-400">
+        {icon}
+      </span>
+
+      {value}
+
+    </span>
+  )
+}
+
+
+/* =====================================================
+   MATCH SCORE
+===================================================== */
+
+function getMatchPercentage(
+  similarity,
+  finalScore
+) {
+
+  /*
+   * Similarity is the strongest semantic signal.
+   * Final score includes rating/popularity.
+   */
+
+  let score = similarity
+
+  if (!score && finalScore) {
+    score = finalScore
+  }
+
+  if (!score) return 0
+
+  return Math.min(
+    99,
+    Math.max(
+      1,
+      Math.round(score * 100)
+    )
+  )
+}
+
+
+/* =====================================================
+   LIST PARSER
+===================================================== */
+
+function parseList(value) {
+
+  if (!value) return []
+
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => String(item).trim())
+      .filter(Boolean)
+  }
+
+  return String(value)
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean)
+}

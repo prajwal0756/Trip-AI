@@ -9,11 +9,13 @@ import EmptyState from '../../components/shared/EmptyState'
 import { CardSkeletonGrid } from '../../components/shared/SkeletonLoader'
 import { useDelayedLoading } from '../../hooks/useDelayedLoading'
 import api from '../../api/client'
+import { useAuth } from '../../context/AuthContext'
 
 const PAGE_SIZE = 6
 
 export default function Destinations() {
   const [searchParams] = useSearchParams()
+  const { user } = useAuth()
 
   const [query, setQuery] = useState(searchParams.get('q') || '')
   const [travelType, setTravelType] = useState('All')
@@ -91,17 +93,22 @@ export default function Destinations() {
 
       setDestinations(mappedDestinations)
 
-      if (!query.trim()) {
-        const statisticsResponse = await api.get(
-          '/destinations/statistics'
-        )
+    const usingServerPagination =
+      !query.trim() &&
+      travelType === 'All' &&
+      region === 'All'
 
-        setTotalDestinations(
-          statisticsResponse.data.total_destinations || 0
-        )
-      } else {
-        setTotalDestinations(mappedDestinations.length)
-      }
+  if (usingServerPagination) {
+    const statisticsResponse = await api.get(
+      '/destinations/statistics'
+    )
+
+    setTotalDestinations(
+      statisticsResponse.data.total_destinations || 0
+    )
+  } else {
+    setTotalDestinations(mappedDestinations.length)
+  }
 
     } catch (err) {
       console.error('Failed to load destinations:', err)
@@ -113,6 +120,8 @@ export default function Destinations() {
 
   fetchDestinations()
 }, [page, query, travelType, region])
+
+
   // ---------------------------------------------
   // Filter options
   // ---------------------------------------------
@@ -133,57 +142,57 @@ export default function Destinations() {
     ),
   ]
 
-  // ---------------------------------------------
-  // Search + filtering + sorting
-  // ---------------------------------------------
 
-  let filtered = destinations.filter((destination) => {
-    const matchesQuery =
-      !query ||
-      destination.name
-        .toLowerCase()
-        .includes(query.toLowerCase()) ||
-      destination.region
-        .toLowerCase()
-        .includes(query.toLowerCase())
 
-    const matchesType =
-      travelType === 'All' ||
-      destination.travelType.includes(travelType)
+// ---------------------------------------------
+// Sorting
+// ---------------------------------------------
 
-    const matchesRegion =
-      region === 'All' ||
-      destination.region === region
+ // ---------------------------------------------
+// Search results + sorting
+// ---------------------------------------------
 
-    return (
-      matchesQuery &&
-      matchesType &&
-      matchesRegion
-    )
-  })
+let filtered = [...destinations]
 
-  if (sort === 'rating') {
-    filtered = [...filtered].sort(
-      (a, b) => b.rating - a.rating
-    )
+// IMPORTANT:
+// When searching, preserve the order returned by
+// the backend.
+//
+// Backend order:
+// 1. Exact destination
+// 2. Same-district destinations
+// 3. Other matching destinations
+//
+// Therefore DO NOT sort search results.
+//
+// Normal browsing can still use the selected sort.
+// ---------------------------------------------
+
+  if (!query.trim()) {
+
+    if (sort === 'rating') {
+      filtered.sort(
+        (a, b) => b.rating - a.rating
+      )
+    }
+
+    if (sort === 'budget-low') {
+      filtered.sort(
+        (a, b) =>
+          a.estimatedBudget -
+          b.estimatedBudget
+      )
+    }
+
+    if (sort === 'budget-high') {
+      filtered.sort(
+        (a, b) =>
+          b.estimatedBudget -
+          a.estimatedBudget
+      )
+    }
+
   }
-
-  if (sort === 'budget-low') {
-    filtered = [...filtered].sort(
-      (a, b) =>
-        a.estimatedBudget -
-        b.estimatedBudget
-    )
-  }
-
-  if (sort === 'budget-high') {
-    filtered = [...filtered].sort(
-      (a, b) =>
-        b.estimatedBudget -
-        a.estimatedBudget
-    )
-  }
-
   // ---------------------------------------------
   // Backend pagination
   // ---------------------------------------------
@@ -205,6 +214,34 @@ export default function Destinations() {
   // ---------------------------------------------
   // UI
   // ---------------------------------------------
+  const usingServerPagination =
+    !query.trim() &&
+    travelType === 'All' &&
+    region === 'All'
+
+  const displayedDestinations = usingServerPagination
+    ? filtered
+    : filtered.slice(
+        (page - 1) * PAGE_SIZE,
+        page * PAGE_SIZE
+      )
+
+
+
+
+    const handleSearchChange = async (value) => {
+      setQuery(value)
+      setPage(1)
+
+      // Only save meaningful searches
+      if (!value.trim()) {
+        return
+      }
+
+      // Don't save search history for every keystroke.
+      // Save only when the user has entered a reasonably complete query.
+    }
+
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
@@ -228,6 +265,23 @@ export default function Destinations() {
         <SearchBar
           value={query}
           onChange={handleFilterChange(setQuery)}
+          onSearch={async (searchQuery) => {
+            if (!searchQuery || !user) {
+              return
+            }
+
+            try {
+              await api.post('/search-history/', {
+                query: searchQuery,
+                search_type: 'destination',
+              })
+            } catch (error) {
+              console.error(
+                'Failed to save search history:',
+                error
+              )
+            }
+          }}
           placeholder="Search destinations or regions…"
           className="flex-1"
         />
@@ -294,7 +348,7 @@ export default function Destinations() {
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-            {filtered.map((destination) => (
+            {displayedDestinations.map((destination) => (
               <DestinationCard
                 key={destination.id}
                 destination={destination}

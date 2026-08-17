@@ -6,15 +6,19 @@ import joblib
 from ml.embeddings.embedding_service import EmbeddingService
 
 
-# ==================================================
-# 1. PATHS
-# ==================================================
+# ============================================================
+# PATHS
+# ============================================================
 
-# backend/
 BASE_DIR = Path(__file__).resolve().parents[2]
 
-# Existing feature model files
-CSV_PATH = BASE_DIR / "app" / "ai" / "recommendation" / "database.csv"
+CSV_PATH = (
+    BASE_DIR
+    / "app"
+    / "ai"
+    / "recommendation"
+    / "database.csv"
+)
 
 PKL_PATH = (
     BASE_DIR
@@ -25,42 +29,114 @@ PKL_PATH = (
 )
 
 
-# ==================================================
-# 2. LOAD EXISTING FEATURE MODEL
-# ==================================================
+# ============================================================
+# LOAD DATA / MODELS
+# ============================================================
+
+print("Loading recommendation data...")
 
 df = pd.read_csv(CSV_PATH)
 
 destination_similarity = joblib.load(PKL_PATH)
 
-
-# ==================================================
-# 3. LOAD EMBEDDING SERVICE
-# ==================================================
-
 embedding_service = EmbeddingService()
 
+print(
+    f"Recommendation dataset loaded: {len(df)} destinations"
+)
 
-# ==================================================
-# 4. EXISTING FEATURE RECOMMENDATION
-# ==================================================
+
+# ============================================================
+# HELPERS
+# ============================================================
+
+def normalize_text(value):
+    if value is None:
+        return ""
+
+    if pd.isna(value):
+        return ""
+
+    return str(value).strip().lower()
+
+
+def safe_float(value, default=None):
+    try:
+        if value is None or pd.isna(value):
+            return default
+
+        return float(value)
+
+    except (ValueError, TypeError):
+        return default
+
+
+def min_max_normalize(series):
+
+    series = pd.to_numeric(
+        series,
+        errors="coerce"
+    ).fillna(0)
+
+    minimum = series.min()
+    maximum = series.max()
+
+    if maximum == minimum:
+        return pd.Series(
+            1.0,
+            index=series.index
+        )
+
+    return (
+        (series - minimum)
+        /
+        (maximum - minimum)
+    )
+
+
+def contains_any(value, values):
+
+    value = normalize_text(value)
+
+    if not value:
+        return False
+
+    if not values:
+        return False
+
+    return any(
+        normalize_text(item) in value
+        for item in values
+    )
+
+
+# ============================================================
+# EXISTING FEATURE RECOMMENDATION
+# ============================================================
 
 def feature_recommend(
     destination_name: str,
     top_n: int = 10
 ):
 
-    destination_name = destination_name.strip().lower()
+    destination_name = normalize_text(
+        destination_name
+    )
 
     names = (
         df["destination_name"]
+        .fillna("")
+        .astype(str)
         .str.strip()
         .str.lower()
     )
 
-    matches = df.index[names == destination_name]
+    matches = df.index[
+        names == destination_name
+    ]
 
     if len(matches) == 0:
+
         raise ValueError(
             f"Destination '{destination_name}' not found."
         )
@@ -68,28 +144,35 @@ def feature_recommend(
     idx = matches[0]
 
     similarity_scores = list(
-        enumerate(destination_similarity[idx])
+        enumerate(
+            destination_similarity[idx]
+        )
     )
 
-    similarity_scores = sorted(
-        similarity_scores,
+    similarity_scores.sort(
         key=lambda x: x[1],
         reverse=True
     )
 
-    # Remove the destination itself
-    similarity_scores = similarity_scores[
-        1:top_n + 1
-    ]
+    # Remove original destination
+    similarity_scores = (
+        similarity_scores[
+            1:top_n + 1
+        ]
+    )
 
     indices = [
         item[0]
         for item in similarity_scores
     ]
 
-    recommendations = df.iloc[indices].copy()
+    recommendations = df.iloc[
+        indices
+    ].copy()
 
-    recommendations["feature_similarity"] = [
+    recommendations[
+        "feature_similarity"
+    ] = [
         item[1]
         for item in similarity_scores
     ]
@@ -97,103 +180,120 @@ def feature_recommend(
     return recommendations
 
 
-# ==================================================
-# 5. EXISTING FEATURE SCORE
-# ==================================================
+# ============================================================
+# FEATURE SCORE
+# ============================================================
 
-def calculate_feature_score(recommendations):
+def calculate_feature_score(
+    recommendations
+):
 
     recommendations = recommendations.copy()
 
     recommendations["feature_score"] = (
-        recommendations["feature_similarity"] * 0.6
-        + recommendations["average_rating"] / 5 * 0.2
-        + recommendations["popularity_score"] / 100 * 0.2
+        recommendations[
+            "feature_similarity"
+        ] * 0.6
+
+        +
+
+        recommendations[
+            "average_rating"
+        ].astype(float)
+        / 5.0
+        * 0.2
+
+        +
+
+        recommendations[
+            "popularity_score"
+        ].astype(float)
+        / 100.0
+        * 0.2
     )
 
     return recommendations
 
 
-# ==================================================
-# 6. SEMANTIC RECOMMENDATION
-# ==================================================
+# ============================================================
+# SEMANTIC RECOMMENDATION
+# ============================================================
 
 def semantic_recommend(
     destination_name: str,
     top_n: int = 10
 ):
 
-    destination_name = destination_name.strip().lower()
+    destination_name = normalize_text(
+        destination_name
+    )
 
     names = (
         df["destination_name"]
+        .fillna("")
+        .astype(str)
         .str.strip()
         .str.lower()
     )
 
-    matches = df.index[names == destination_name]
+    matches = df.index[
+        names == destination_name
+    ]
 
     if len(matches) == 0:
+
         raise ValueError(
             f"Destination '{destination_name}' not found."
         )
 
     idx = matches[0]
 
-    # Use the destination's description
-    # as the semantic query.
-    query = df.loc[idx, "description"]
+    query = df.loc[
+        idx,
+        "description"
+    ]
 
     results = embedding_service.search(
         query,
         top_n=top_n + 1
     )
 
-    # Remove the original destination
     results = results[
-        results["destination_name"].str.strip().str.lower()
+        results[
+            "destination_name"
+        ]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+        .str.lower()
         != destination_name
     ]
 
     return results.head(top_n)
 
 
-# ==================================================
-# 7. COMBINE BOTH MODELS
-# ==================================================
+# ============================================================
+# COMBINED DESTINATION RECOMMENDATION
+# ============================================================
 
 def combined_recommend(
     destination_name: str,
     top_n: int = 10
 ):
 
-    # ----------------------------------------------
-    # Feature model
-    # ----------------------------------------------
-
     feature_results = feature_recommend(
         destination_name,
-        top_n=top_n
+        top_n
     )
 
     feature_results = calculate_feature_score(
         feature_results
     )
 
-
-    # ----------------------------------------------
-    # Semantic model
-    # ----------------------------------------------
-
     semantic_results = semantic_recommend(
         destination_name,
-        top_n=top_n
+        top_n
     )
-
-
-    # ----------------------------------------------
-    # Merge both result sets
-    # ----------------------------------------------
 
     combined = pd.merge(
         feature_results[
@@ -214,11 +314,6 @@ def combined_recommend(
         how="outer"
     )
 
-
-    # ----------------------------------------------
-    # Fill missing scores
-    # ----------------------------------------------
-
     combined["feature_score"] = (
         combined["feature_score"]
         .fillna(0)
@@ -228,28 +323,6 @@ def combined_recommend(
         combined["similarity_score"]
         .fillna(0)
     )
-
-
-    # ----------------------------------------------
-    # Normalize scores
-    # ----------------------------------------------
-
-    def min_max_normalize(series):
-
-        minimum = series.min()
-        maximum = series.max()
-
-        if maximum == minimum:
-            return pd.Series(
-                1.0,
-                index=series.index
-            )
-
-        return (
-            (series - minimum)
-            / (maximum - minimum)
-        )
-
 
     combined["feature_score_norm"] = (
         min_max_normalize(
@@ -263,74 +336,39 @@ def combined_recommend(
         )
     )
 
-
-    # ----------------------------------------------
-    # Combined score
-    # ----------------------------------------------
-
     combined["combined_score"] = (
-        combined["feature_score_norm"] * 0.5
-        + combined["semantic_score_norm"] * 0.5
+        combined[
+            "semantic_score_norm"
+        ] * 0.55
+
+        +
+
+        combined[
+            "feature_score_norm"
+        ] * 0.30
+
+        +
+
+        combined[
+            "feature_score_norm"
+        ] * 0.15
     )
-
-
-    # ----------------------------------------------
-    # Sort
-    # ----------------------------------------------
 
     combined = combined.sort_values(
         by="combined_score",
         ascending=False
     )
 
-    return combined.head(top_n).reset_index(
+    return combined.head(
+        top_n
+    ).reset_index(
         drop=True
     )
 
 
-# ==================================================
-# 8. TEST
-# ==================================================
-
-if __name__ == "__main__":
-
-    destination = "Phewa Lake"
-
-    results = combined_recommend(
-        destination,
-        top_n=10
-    )
-
-    print("\n")
-    print("=" * 80)
-    print(f"COMBINED RECOMMENDATIONS FOR: {destination}")
-    print("=" * 80)
-
-    for index, row in results.iterrows():
-
-        print(
-            f"\n{index + 1}. "
-            f"{row['destination_name']}"
-        )
-
-        print(
-            f"   Feature score: "
-            f"{row['feature_score']:.4f}"
-        )
-
-        print(
-            f"   Semantic score: "
-            f"{row['semantic_score']:.4f}"
-        )
-
-        print(
-            f"   Combined score: "
-            f"{row['combined_score']:.4f}"
-        )
-
-# ==================================================
-# 9. QUERY-BASED RECOMMENDATION
-# ==================================================
+# ============================================================
+# QUERY-BASED AI RECOMMENDATION
+# ============================================================
 
 def query_recommend(
     query: str,
@@ -338,77 +376,324 @@ def query_recommend(
     top_n: int = 10
 ):
     """
-    Recommend destinations from a natural-language query.
+    Natural-language AI recommendation.
 
-    Flow:
+    The user can write things such as:
 
-        User query
-             ↓
-        NLP extracted preferences
-             ↓
-        Semantic candidate retrieval
-             ↓
-        Structured preference filtering
-             ↓
-        Final ranking
+        "I want a peaceful 3 day trip near Pokhara
+         with mountain views and local food"
+
+    The system combines:
+
+        NLP preferences
+        +
+        semantic embeddings
+        +
+        structured preference matching
+        +
+        rating
+        +
+        popularity
     """
 
-    # --------------------------------------------------
-    # 1. Build semantic filters
-    # --------------------------------------------------
+    query = query.strip()
 
-    filters = {
-        "district": nlp_result.get("district"),
-        "province": nlp_result.get("province"),
-        "category": nlp_result.get("category"),
-        "activities": nlp_result.get(
-            "activities",
-            []
-        )
-    }
+    # ========================================================
+    # 1. RETRIEVE BROAD SEMANTIC CANDIDATES
+    # ========================================================
 
-    # Remove empty filters
-    filters = {
-        key: value
-        for key, value in filters.items()
-        if value
-    }
-
-    # --------------------------------------------------
-    # 2. Retrieve semantic candidates
-    # --------------------------------------------------
+    # IMPORTANT:
+    # Do not apply every NLP field as a hard filter.
+    #
+    # Semantic retrieval should first find destinations
+    # that are generally related to the user's request.
 
     semantic_results = embedding_service.search(
-        query,
-        top_n=50,
-        filters=filters
+        query=query,
+        top_n=min(
+            100,
+            len(df)
+        ),
+        filters=None
     )
 
     if semantic_results.empty:
+
         return pd.DataFrame()
 
-    # --------------------------------------------------
-    # 3. Merge with full destination dataset
-    # --------------------------------------------------
+    # ========================================================
+    # 2. MERGE WITH COMPLETE DESTINATION DATA
+    # ========================================================
 
     candidates = pd.merge(
         semantic_results[
             [
+                "destination_id",
                 "destination_name",
                 "similarity_score"
             ]
         ],
+
         df,
-        on="destination_name",
+
+        on=[
+            "destination_id",
+            "destination_name"
+        ],
+
         how="inner"
     )
 
     if candidates.empty:
+
         return pd.DataFrame()
 
-    # --------------------------------------------------
-# 4. Apply difficulty constraint
-# --------------------------------------------------
+    # ========================================================
+    # 3. INITIAL SCORE
+    # ========================================================
+
+    candidates["semantic_score"] = (
+        pd.to_numeric(
+            candidates[
+                "similarity_score"
+            ],
+            errors="coerce"
+        )
+        .fillna(0)
+    )
+
+    # ========================================================
+    # 4. SEMANTIC NORMALIZATION
+    # ========================================================
+
+    candidates[
+        "semantic_score_norm"
+    ] = min_max_normalize(
+        candidates[
+            "semantic_score"
+        ]
+    )
+
+    # ========================================================
+    # 5. PREFERENCE SCORE
+    # ========================================================
+
+    candidates[
+        "preference_score"
+    ] = 0.0
+
+    # --------------------------------------------------------
+    # Location
+    # --------------------------------------------------------
+
+    district = nlp_result.get(
+        "district"
+    )
+
+    province = nlp_result.get(
+        "province"
+    )
+
+    location = nlp_result.get(
+        "location"
+    )
+
+    destination = nlp_result.get(
+        "destination"
+    )
+
+    if district:
+
+        district_mask = (
+            candidates["district"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            ==
+            normalize_text(district)
+        )
+
+        candidates.loc[
+            district_mask,
+            "preference_score"
+        ] += 0.25
+
+    elif province:
+
+        province_mask = (
+            candidates["province"]
+            .fillna("")
+            .astype(str)
+            .str.strip()
+            .str.lower()
+            ==
+            normalize_text(province)
+        )
+
+        candidates.loc[
+            province_mask,
+            "preference_score"
+        ] += 0.20
+
+    elif location:
+
+        location_value = normalize_text(
+            location
+        )
+
+        location_mask = (
+            candidates[
+                "destination_name"
+            ]
+            .fillna("")
+            .astype(str)
+            .str.lower()
+            .str.contains(
+                location_value,
+                regex=False
+            )
+        )
+
+        location_mask |= (
+            candidates[
+                "district"
+            ]
+            .fillna("")
+            .astype(str)
+            .str.lower()
+            ==
+            location_value
+        )
+
+        location_mask |= (
+            candidates[
+                "province"
+            ]
+            .fillna("")
+            .astype(str)
+            .str.lower()
+            ==
+            location_value
+        )
+
+        candidates.loc[
+            location_mask,
+            "preference_score"
+        ] += 0.20
+
+    # ========================================================
+    # 6. CATEGORY
+    # ========================================================
+
+    category = nlp_result.get(
+        "category"
+    )
+
+    if category:
+
+        category_mask = (
+            candidates[
+                "category"
+            ]
+            .fillna("")
+            .astype(str)
+            .str.lower()
+            .str.contains(
+                normalize_text(category),
+                regex=False
+            )
+        )
+
+        candidates.loc[
+            category_mask,
+            "preference_score"
+        ] += 0.15
+
+    # ========================================================
+    # 7. ACTIVITIES
+    # ========================================================
+
+    activities = nlp_result.get(
+        "activities",
+        []
+    )
+
+    if isinstance(
+        activities,
+        str
+    ):
+
+        activities = [
+            activities
+        ]
+
+    if activities:
+
+        activity_matches = (
+            candidates[
+                "activities"
+            ]
+            .fillna("")
+            .astype(str)
+            .apply(
+                lambda value:
+                sum(
+                    1
+                    for activity
+                    in activities
+                    if normalize_text(activity)
+                    in normalize_text(value)
+                )
+            )
+        )
+
+        candidates[
+            "preference_score"
+        ] += (
+            activity_matches.clip(
+                upper=len(activities)
+            )
+            / max(
+                len(activities),
+                1
+            )
+            * 0.20
+        )
+
+    # ========================================================
+    # 8. TRAVEL TYPE
+    # ========================================================
+
+    travel_type = nlp_result.get(
+        "travel_type"
+    )
+
+    if travel_type:
+
+        travel_mask = (
+            candidates[
+                "travel_type"
+            ]
+            .fillna("")
+            .astype(str)
+            .str.lower()
+            .str.contains(
+                normalize_text(
+                    travel_type
+                ),
+                regex=False
+            )
+        )
+
+        candidates.loc[
+            travel_mask,
+            "preference_score"
+        ] += 0.10
+
+    # ========================================================
+    # 9. DIFFICULTY
+    # ========================================================
 
     difficulty = nlp_result.get(
         "difficulty_level"
@@ -417,129 +702,267 @@ def query_recommend(
     if difficulty:
 
         difficulty_mask = (
-            candidates["difficulty_level"]
+            candidates[
+                "difficulty_level"
+            ]
             .fillna("")
             .astype(str)
             .str.lower()
             .str.strip()
-            == difficulty.lower().strip()
+            ==
+            normalize_text(
+                difficulty
+            )
         )
 
-        filtered = candidates[
-            difficulty_mask
-        ].copy()
+        candidates.loc[
+            difficulty_mask,
+            "preference_score"
+        ] += 0.10
 
-        # Difficulty is an explicit user requirement,
-        # so use it as a hard constraint when matches exist.
-        if not filtered.empty:
-            candidates = filtered
-
-    # --------------------------------------------------
-    # 5. Apply family constraint
-    # --------------------------------------------------
+    # ========================================================
+    # 10. FAMILY / GROUP TYPE
+    # ========================================================
 
     group_type = nlp_result.get(
         "group_type"
     )
 
-    if group_type == "family":
+    if normalize_text(
+        group_type
+    ) == "family":
 
-        family_values = (
-            candidates["family_friendly"]
+        family_mask = (
+            candidates[
+                "family_friendly"
+            ]
             .fillna("")
             .astype(str)
             .str.lower()
             .str.strip()
+            .isin(
+                [
+                    "yes",
+                    "true",
+                    "1"
+                ]
+            )
         )
 
-        family_mask = family_values.isin(
-            [
-                "yes",
-                "true",
-                "1"
-            ]
+        candidates.loc[
+            family_mask,
+            "preference_score"
+        ] += 0.10
+
+    # ========================================================
+    # 11. BUDGET
+    # ========================================================
+
+    budget = safe_float(
+        nlp_result.get(
+            "budget_npr"
+        )
+    )
+
+    if budget and budget > 0:
+
+        candidate_budget = pd.to_numeric(
+            candidates[
+                "estimated_budget_npr"
+            ],
+            errors="coerce"
         )
 
-        filtered = candidates[
-            family_mask
-        ].copy()
+        budget_difference = (
+            abs(
+                candidate_budget
+                - budget
+            )
+            / budget
+        )
 
-        # Family-friendly is an explicit requirement.
-        if not filtered.empty:
-            candidates = filtered
+        # Perfect budget match = 1
+        #
+        # 10% difference = 0.9
+        #
+        # 50% difference = 0.5
+        #
+        # Very expensive destination = low score
 
-    # --------------------------------------------------
-    # 6. Semantic score normalization
-    # --------------------------------------------------
+        budget_score = (
+            1
+            - budget_difference
+        ).clip(
+            lower=0,
+            upper=1
+        )
 
-    semantic_min = (
-        candidates["similarity_score"].min()
-    )
-
-    semantic_max = (
-        candidates["similarity_score"].max()
-    )
-
-    if semantic_max == semantic_min:
-
-        candidates["semantic_score_norm"] = 1.0
+        candidates[
+            "budget_score"
+        ] = budget_score
 
     else:
 
-        candidates["semantic_score_norm"] = (
-            (
-                candidates["similarity_score"]
-                - semantic_min
+        candidates[
+            "budget_score"
+        ] = 0.5
+
+    # ========================================================
+    # 12. DURATION
+    # ========================================================
+
+    duration = safe_float(
+        nlp_result.get(
+            "duration_days"
+        )
+    )
+
+    if duration and duration > 0:
+
+        destination_duration = pd.to_numeric(
+            candidates[
+                "average_duration_days"
+            ],
+            errors="coerce"
+        )
+
+        duration_difference = (
+            abs(
+                destination_duration
+                - duration
             )
-            /
-            (
-                semantic_max
-                - semantic_min
+            / max(
+                duration,
+                1
             )
         )
 
-    # --------------------------------------------------
-    # 7. Rating score
-    # --------------------------------------------------
+        candidates[
+            "duration_score"
+        ] = (
+            1
+            - duration_difference
+        ).clip(
+            lower=0,
+            upper=1
+        )
 
-    candidates["rating_score"] = (
-        candidates["average_rating"]
+    else:
+
+        candidates[
+            "duration_score"
+        ] = 0.5
+
+    # ========================================================
+    # 13. RATING
+    # ========================================================
+
+    candidates[
+        "rating_score"
+    ] = (
+        pd.to_numeric(
+            candidates[
+                "average_rating"
+            ],
+            errors="coerce"
+        )
+        .fillna(0)
         / 5.0
+    ).clip(
+        lower=0,
+        upper=1
     )
 
-    # --------------------------------------------------
-    # 8. Popularity score
-    # --------------------------------------------------
+    # ========================================================
+    # 14. POPULARITY
+    # ========================================================
 
-    candidates["popularity_score_norm"] = (
-        candidates["popularity_score"]
+    candidates[
+        "popularity_score_norm"
+    ] = (
+        pd.to_numeric(
+            candidates[
+                "popularity_score"
+            ],
+            errors="coerce"
+        )
+        .fillna(0)
         / 100.0
+    ).clip(
+        lower=0,
+        upper=1
     )
 
-    # --------------------------------------------------
-    # 9. Final ranking score
-    # --------------------------------------------------
+    # ========================================================
+    # 15. FINAL AI SCORE
+    # ========================================================
 
-    candidates["final_score"] = (
-        candidates["semantic_score_norm"] * 0.60
+    candidates[
+        "final_score"
+    ] = (
+
+        # Meaning of user's sentence
+        candidates[
+            "semantic_score_norm"
+        ] * 0.45
+
         +
-        candidates["rating_score"] * 0.20
+
+        # Explicit preferences
+        candidates[
+            "preference_score"
+        ] * 0.20
+
         +
-        candidates["popularity_score_norm"] * 0.20
+
+        # Budget
+        candidates[
+            "budget_score"
+        ] * 0.10
+
+        +
+
+        # Duration
+        candidates[
+            "duration_score"
+        ] * 0.05
+
+        +
+
+        # Quality
+        candidates[
+            "rating_score"
+        ] * 0.10
+
+        +
+
+        # Popularity
+        candidates[
+            "popularity_score_norm"
+        ] * 0.10
     )
 
-    # --------------------------------------------------
-    # 10. Sort
-    # --------------------------------------------------
+    # ========================================================
+    # 16. SORT
+    # ========================================================
 
     candidates = candidates.sort_values(
-        by="final_score",
-        ascending=False
+        by=[
+            "final_score",
+            "semantic_score",
+            "average_rating"
+        ],
+
+        ascending=[
+            False,
+            False,
+            False
+        ]
     )
 
-    # --------------------------------------------------
-    # 11. Return useful fields
-    # --------------------------------------------------
+    # ========================================================
+    # 17. RETURN
+    # ========================================================
 
     return candidates[
         [
@@ -552,8 +975,15 @@ def query_recommend(
             "activities",
             "difficulty_level",
             "family_friendly",
+            "best_season",
+            "estimated_budget_npr",
+            "average_duration_days",
             "average_rating",
+            "review_count",
             "popularity_score",
+            "latitude",
+            "longitude",
+            "description",
             "similarity_score",
             "final_score"
         ]

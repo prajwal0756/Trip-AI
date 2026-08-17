@@ -44,7 +44,7 @@ export default function TravelerDashboard() {
       <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-3">
         {/* Upcoming trips */}
         <div className="lg:col-span-2">
-          <h2 className="font-display text-lg font-medium text-ink-900">Upcoming trips</h2>
+          <h2 className="font-display text-lg font-medium text-[#10263A] dark:text-[#F5F3EE]">Upcoming trips</h2>
           <div className="mt-3 flex flex-col gap-3">
             {upcoming.length === 0 ? (
               <EmptyState
@@ -61,7 +61,7 @@ export default function TravelerDashboard() {
                   <div key={b.id} className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm">
                     <img src={h.image} alt={h.name} className="h-14 w-14 rounded-xl object-cover" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-ink-900">{h.name}</p>
+                      <p className="text-sm font-medium text-[#10263A] dark:text-[#F5F3EE]">{h.name}</p>
                       <p className="text-xs text-ink-500">{b.checkIn} → {b.checkOut}</p>
                     </div>
                     <Badge status={b.status}>{b.status}</Badge>
@@ -72,10 +72,10 @@ export default function TravelerDashboard() {
           </div>
 
           {/* Recent activity */}
-          <h2 className="mt-8 font-display text-lg font-medium text-ink-900">Recent activity</h2>
+          <h2 className="mt-8 font-display text-lg font-medium text-[#10263A] dark:text-[#F5F3EE]">Recent activity</h2>
           <div className="mt-3 flex flex-col gap-2">
             {recentActivity.length === 0 ? (
-              <p className="text-sm text-ink-500">No recent activity yet.</p>
+              <p className="text-sm text-[#10263A] dark:text-[#F5F3EE]">No recent activity yet.</p>
             ) : (
               recentActivity.map((b) => {
                 const h = homestays.find((x) => x.id === b.homestayId)
@@ -92,7 +92,7 @@ export default function TravelerDashboard() {
 
         {/* Recommended destinations + saved */}
         <div>
-          <h2 className="font-display text-lg font-medium text-ink-900">Recommended for you</h2>
+          <h2 className="font-display text-lg font-medium text-[#10263A] dark:text-[#F5F3EE]">Recommended for you</h2>
           <div className="mt-3 flex flex-col gap-3">
             {recommendedDestinations.map((d) => (
               <Link key={d.id} to={`/destination/${d.id}`} className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm hover:shadow-md">
@@ -105,7 +105,7 @@ export default function TravelerDashboard() {
             ))}
           </div>
 
-          <h2 className="mt-8 font-display text-lg font-medium text-ink-900">Saved destinations</h2>
+          <h2 className="mt-8 font-display text-lg font-medium text-[#10263A] dark:text-[#F5F3EE]">Saved destinations</h2>
           <div className="mt-3 flex flex-col gap-3">
             {savedDestinations.length === 0 ? (
               <p className="text-sm text-ink-500">Tap the heart on a destination to save it here.</p>

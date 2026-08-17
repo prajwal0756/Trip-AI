@@ -30,7 +30,7 @@ const months = [
 ]
 
 const initialForm = {
-  budget: 250,
+  budget: 2000,
   duration: 4,
   travelType: 'Nature',
   region: 'Any',
@@ -112,11 +112,20 @@ export default function RecommendationForm() {
         '/recommendations/',
         {
           destination_name: selectedDestination,
-          top_n: 6,
+          top_n: 50,
         }
       )
 
-      setResults(response.data)
+      const budgetFiltered = response.data
+        .filter(
+          (destination) =>
+            Number(destination.estimated_budget_npr) <= form.budget
+        )
+        .slice(0, 12)
+
+      setResults(budgetFiltered)
+
+
     } catch (error) {
       console.error(
         'Failed to get recommendations:',
@@ -142,12 +151,12 @@ export default function RecommendationForm() {
         </div>
 
         <div>
-          <h1 className="font-display text-2xl font-medium text-ink-900">
-            AI Recommendation
+          <h1 className="font-display text-2xl font-semibold !text-[#1C2625]">
+            Explore by Preferences
           </h1>
 
-          <p className="text-sm text-ink-500">
-            Choose a destination and TripAI will find similar destinations.
+          <p className="text-sm !text-[#4A5654]">
+            Tell us how you want to travel and TripAI will find destinations that match your preferences.
           </p>
         </div>
       </div>
@@ -190,14 +199,14 @@ export default function RecommendationForm() {
 
         <div>
           <label className="mb-1.5 block text-sm font-medium text-ink-700">
-            Budget (USD)
+            Budget (NPR)
           </label>
 
           <input
             type="range"
-            min={50}
-            max={600}
-            step={10}
+            min={5000}
+            max={100000}
+            step={5000}
             value={form.budget}
             onChange={(e) =>
               setForm((f) => ({
@@ -209,7 +218,7 @@ export default function RecommendationForm() {
           />
 
           <p className="mt-1 text-sm font-medium text-teal-900">
-            ${form.budget}
+            NPR {form.budget.toLocaleString()}
           </p>
         </div>
 
@@ -403,7 +412,7 @@ export default function RecommendationForm() {
           Results
       ----------------------------------------- */}
 
-      <div className="mt-10">
+      <div className="mt-12">
 
         {loading && (
           <LoadingSpinner
@@ -424,11 +433,21 @@ export default function RecommendationForm() {
           results &&
           results.length > 0 && (
             <>
-              <h2 className="font-display text-lg font-medium text-ink-900">
-                Recommended for you
-              </h2>
+              <div className="mb-6">
+                <div className="flex items-center gap-2">
+                  <FaMagic className="text-terracotta-400" size={16} />
 
-              <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  <h2 className="font-display text-2xl font-semibold !text-[#1C2625]">
+                    Destinations matching your preferences
+                  </h2>
+                </div>
+
+                <p className="mt-1 text-sm !text-[#4A5654]">
+                  Filtered using your budget, travel style, activities, region, and trip preferences.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
 
                 {results.map((r) => (
                   <RecommendationCard

@@ -1,569 +1,683 @@
 import { useEffect, useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import {
+  FaArrowLeft,
   FaMapMarkerAlt,
-  FaCalendarAlt,
-  FaWallet,
-  FaCheckCircle,
-  FaHeart,
-  FaRegHeart,
-  FaUsers,
-  FaHiking,
+  FaMountain,
+  FaStar,
 } from 'react-icons/fa'
 
-import StarRating from '../../components/shared/StarRating'
-import HomestayCard from '../../components/cards/HomestayCard'
-import ReviewCard from '../../components/cards/ReviewCard'
-import Button from '../../components/shared/Button'
-import EmptyState from '../../components/shared/EmptyState'
-
 import api from '../../api/client'
-import { homestays } from '../../data/homestays'
-import { reviews as allReviews } from '../../data/reviews'
-import { useApp } from '../../context/AppContext'
+import HomestayCard from '../../components/cards/HomestayCard'
+import StarRating from '../../components/shared/StarRating'
+import { CardSkeletonGrid } from '../../components/shared/SkeletonLoader'
 
 export default function DestinationDetails() {
   const { id } = useParams()
 
   const [destination, setDestination] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [activeImage, setActiveImage] = useState(0)
+  const [homestays, setHomestays] = useState([])
 
-  const {
-    favoriteDestinations,
-    toggleFavoriteDestination,
-  } = useApp()
+  const [loading, setLoading] = useState(true)
+  const [homestayLoading, setHomestayLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  // =====================================================
+  // LOAD DESTINATION DETAILS
+  // =====================================================
 
   useEffect(() => {
-    const fetchDestination = async () => {
+    const loadDestination = async () => {
       try {
         setLoading(true)
         setError('')
 
-        const response = await api.get(`/destinations/${id}`)
+        const response = await api.get(
+          `/destinations/${id}`
+        )
 
         setDestination(response.data)
-        setActiveImage(0)
-      } catch (err) {
-        console.error('Failed to load destination:', err)
 
-        setDestination(null)
+      } catch (err) {
+        console.error(
+          'Failed to load destination:',
+          err
+        )
+
         setError(
           err.response?.data?.detail ||
           'Unable to load destination.'
         )
+
       } finally {
         setLoading(false)
       }
     }
 
-    fetchDestination()
+    if (id) {
+      loadDestination()
+    }
   }, [id])
 
-  // -----------------------------------------
-  // Loading
-  // -----------------------------------------
+  // =====================================================
+  // LOAD HOMESTAYS FROM SAME DISTRICT
+  // =====================================================
+
+  useEffect(() => {
+    const loadHomestays = async () => {
+      if (!destination?.district) {
+        setHomestayLoading(false)
+        return
+      }
+
+      try {
+        setHomestayLoading(true)
+
+        const response = await api.get(
+          '/homestays/district/' +
+            encodeURIComponent(
+              destination.district
+            ),
+          {
+            params: {
+              limit: 6,
+            },
+          }
+        )
+
+        setHomestays(response.data || [])
+
+      } catch (err) {
+        console.error(
+          'Failed to load homestays:',
+          err
+        )
+
+        setHomestays([])
+
+      } finally {
+        setHomestayLoading(false)
+      }
+    }
+
+    loadHomestays()
+  }, [destination])
+
+  // =====================================================
+  // LOADING
+  // =====================================================
 
   if (loading) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="flex min-h-[400px] items-center justify-center">
-          <p className="text-sm text-ink-500">
-            Loading destination...
-          </p>
+      <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+
+        <div className="h-8 w-32 animate-pulse rounded bg-sand-200 dark:bg-white/10" />
+
+        <div className="mt-6 h-[420px] animate-pulse rounded-3xl bg-sand-200 dark:bg-white/10" />
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-3">
+          <div className="h-24 animate-pulse rounded-2xl bg-sand-200 dark:bg-white/10" />
+          <div className="h-24 animate-pulse rounded-2xl bg-sand-200 dark:bg-white/10" />
+          <div className="h-24 animate-pulse rounded-2xl bg-sand-200 dark:bg-white/10" />
         </div>
+
       </div>
     )
   }
 
-  // -----------------------------------------
-  // Not found / error
-  // -----------------------------------------
+  // =====================================================
+  // ERROR
+  // =====================================================
 
-  if (!destination) {
+  if (error || !destination) {
     return (
-      <div className="mx-auto max-w-3xl px-4 py-16">
-        <EmptyState
-          title="Destination not found"
-          description={
-            error ||
-            'This destination may have been removed.'
-          }
-          action={
-            <Link to="/destinations">
-              <Button>
-                Back to destinations
-              </Button>
-            </Link>
-          }
-        />
-      </div>
-    )
-  }
+      <div className="mx-auto max-w-4xl px-4 py-20 text-center sm:px-6">
 
-  // -----------------------------------------
-  // Normalize backend data
-  // -----------------------------------------
-
-  const destinationId = destination.destination_id
-
-  const images = destination.images || []
-
-  const imageUrls = images
-    .map((image) => image.image_url)
-    .filter(Boolean)
-
-  const hasImages = imageUrls.length > 0
-
-  const travelTypes = destination.travel_type
-    ? destination.travel_type
-        .split(',')
-        .map((type) => type.trim())
-        .filter(Boolean)
-    : []
-
-  const activities = destination.activities || []
-
-  const categories = destination.categories || []
-
-  const isFavorite =
-    favoriteDestinations.includes(destinationId) ||
-    favoriteDestinations.includes(String(destinationId))
-
-  // -----------------------------------------
-  // Existing local data
-  // -----------------------------------------
-
-  const nearbyHomestays = homestays.filter(
-    (h) =>
-      String(h.destinationId) === String(destinationId)
-  )
-
-  const destinationReviews = allReviews.filter(
-    (r) =>
-      r.targetType === 'destination' &&
-      String(r.targetId) === String(destinationId)
-  )
-
-  // -----------------------------------------
-  // Render
-  // -----------------------------------------
-
-  return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-
-      {/* =====================================
-          IMAGE / PLACEHOLDER
-      ===================================== */}
-
-      <div className="overflow-hidden rounded-2xl">
-
-        {hasImages ? (
-          <img
-            src={imageUrls[activeImage]}
-            alt={destination.destination_name}
-            className="h-72 w-full object-cover sm:h-96"
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-500/10">
+          <FaMapMarkerAlt
+            size={24}
+            className="text-terracotta-500"
           />
-        ) : (
-          /*
-           * Temporary placeholder until destination
-           * images are available.
-           */
-          <div className="relative flex h-72 items-center justify-center overflow-hidden bg-gradient-to-br from-[#173446] via-[#102631] to-[#0B1117] sm:h-96">
-
-            {/* Decorative glow */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(225,123,72,0.18),_transparent_60%)]" />
-
-            {/* Subtle border */}
-            <div className="absolute inset-0 rounded-2xl border border-white/10" />
-
-            {/* Placeholder content */}
-            <div className="relative z-10 px-6 text-center">
-
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-terracotta-500/15 ring-1 ring-terracotta-400/20">
-                <FaMapMarkerAlt
-                  className="text-terracotta-400"
-                  size={26}
-                />
-              </div>
-
-              <p className="mt-5 font-display text-2xl font-semibold text-white">
-                {destination.destination_name}
-              </p>
-
-              <p className="mt-2 text-sm text-slate-300">
-                {destination.district}, {destination.province}
-              </p>
-
-              <p className="mt-4 text-xs font-medium uppercase tracking-[0.2em] text-slate-500">
-                Destination
-              </p>
-
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Image thumbnails */}
-
-      {imageUrls.length > 1 && (
-        <div className="mt-3 flex gap-3 overflow-x-auto">
-          {imageUrls.map((img, index) => (
-            <button
-              key={`${img}-${index}`}
-              onClick={() => setActiveImage(index)}
-              className={`h-16 w-24 shrink-0 overflow-hidden rounded-lg border-2 ${
-                activeImage === index
-                  ? 'border-teal-500'
-                  : 'border-transparent'
-              }`}
-            >
-              <img
-                src={img}
-                alt=""
-                className="h-full w-full object-cover"
-              />
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* =====================================
-          HEADER
-      ===================================== */}
-
-      <div className="mt-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-
-        <div>
-
-          <h1 className="font-display text-3xl font-medium text-white">
-            {destination.destination_name}
-          </h1>
-
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-400">
-            <FaMapMarkerAlt size={12} />
-
-            {destination.district}, {destination.province}
-          </p>
-
-          <div className="mt-2">
-            <StarRating
-              rating={Number(destination.average_rating || 0)}
-              reviewCount={Number(destination.review_count || 0)}
-            />
-          </div>
-
         </div>
 
-        <button
-          onClick={() =>
-            toggleFavoriteDestination(destinationId)
-          }
-          className="flex items-center gap-2 rounded-xl border border-white/10 px-4 py-2.5 text-sm font-medium text-terracotta-400 transition-colors hover:bg-white/5"
-        >
-          {isFavorite ? (
-            <FaHeart />
-          ) : (
-            <FaRegHeart />
-          )}
+        <h1 className="mt-5 font-display text-2xl font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+          Destination not found
+        </h1>
 
-          {isFavorite ? 'Saved' : 'Save'}
-        </button>
-
-      </div>
-
-      {/* =====================================
-          QUICK FACTS
-      ===================================== */}
-
-      <div className="mt-6 flex flex-wrap gap-4 rounded-2xl bg-[#121C27] p-5 shadow-sm">
-
-        <div className="flex items-center gap-2 text-sm text-slate-300">
-          <FaWallet className="text-teal-500" />
-
-          Est. budget:
-
-          <span className="font-medium text-white">
-            NPR{' '}
-            {Number(
-              destination.estimated_budget_npr || 0
-            ).toLocaleString()}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 text-sm text-slate-300">
-          <FaCalendarAlt className="text-teal-500" />
-
-          Best time:
-
-          <span className="font-medium text-white">
-            {destination.best_season || 'Year-round'}
-          </span>
-        </div>
-
-        {destination.average_duration_days && (
-          <div className="flex items-center gap-2 text-sm text-slate-300">
-            <FaCalendarAlt className="text-teal-500" />
-
-            Duration:
-
-            <span className="font-medium text-white">
-              {destination.average_duration_days} days
-            </span>
-          </div>
-        )}
-
-        {destination.family_friendly !== undefined &&
-          destination.family_friendly !== null && (
-            <div className="flex items-center gap-2 text-sm text-slate-300">
-              <FaUsers className="text-teal-500" />
-
-              Family friendly:
-
-              <span className="font-medium text-white">
-                {String(destination.family_friendly)}
-              </span>
-            </div>
-          )}
-
-      </div>
-
-      {/* =====================================
-          TRAVEL TYPES
-      ===================================== */}
-
-      {travelTypes.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-
-          {travelTypes.map((type) => (
-            <span
-              key={type}
-              className="rounded-full bg-teal-50 px-3 py-1.5 text-xs font-medium text-teal-700"
-            >
-              {type}
-            </span>
-          ))}
-
-        </div>
-      )}
-
-      {/* =====================================
-          CATEGORIES
-      ===================================== */}
-
-      {categories.length > 0 && (
-        <div className="mt-6">
-
-          <h2 className="font-display text-xl font-medium text-white">
-            Categories
-          </h2>
-
-          <div className="mt-3 flex flex-wrap gap-2">
-
-            {categories.map((category) => (
-              <span
-                key={category.category_id}
-                className="rounded-full bg-sand-200 px-3 py-1.5 text-xs font-medium text-ink-700"
-              >
-                {category.category}
-              </span>
-            ))}
-
-          </div>
-
-        </div>
-      )}
-
-      {/* =====================================
-          ABOUT
-      ===================================== */}
-
-      <div className="mt-8">
-
-        <h2 className="font-display text-xl font-medium text-white">
-          About {destination.destination_name}
-        </h2>
-
-        <p className="mt-3 text-sm leading-relaxed text-slate-400">
-          {destination.description ||
-            'Explore this destination and discover what makes it special.'}
+        <p className="mt-2 text-sm text-ink-500 dark:text-[#AAB5C0]">
+          {error ||
+            'We could not find this destination.'}
         </p>
 
-      </div>
-
-      {/* =====================================
-          ACTIVITIES
-      ===================================== */}
-
-      {activities.length > 0 && (
-        <div className="mt-8">
-
-          <h2 className="font-display text-xl font-medium text-white">
-            Things to do
-          </h2>
-
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-
-            {activities.map((activity) => (
-              <div
-                key={activity.activity_id}
-                className="rounded-xl bg-[#121C27] p-4 shadow-sm"
-              >
-
-                <div className="flex items-center gap-2">
-
-                  <FaCheckCircle
-                    className="shrink-0 text-emerald-500"
-                    size={14}
-                  />
-
-                  <span className="text-sm font-medium text-white">
-                    {activity.activities}
-                  </span>
-
-                </div>
-
-                {activity.difficulty_level && (
-                  <p className="mt-2 flex items-center gap-2 text-xs text-slate-400">
-                    <FaHiking size={11} />
-
-                    Difficulty:
-
-                    <span className="font-medium text-slate-300">
-                      {activity.difficulty_level}
-                    </span>
-                  </p>
-                )}
-
-              </div>
-            ))}
-
-          </div>
-
-        </div>
-      )}
-
-      {/* =====================================
-          LOCATION
-      ===================================== */}
-
-      <div className="mt-8">
-
-        <h2 className="font-display text-xl font-medium text-white">
-          Location
-        </h2>
-
-        <div className="relative mt-3 flex h-56 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-[#173446] via-[#102631] to-[#0B1117] text-sm text-slate-300">
-
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(225,123,72,0.12),_transparent_65%)]" />
-
-          <div className="relative z-10 flex flex-col items-center text-center">
-
-            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-terracotta-500/15">
-              <FaMapMarkerAlt
-                className="text-terracotta-400"
-                size={20}
-              />
-            </div>
-
-            <p className="mt-3 font-medium text-white">
-              {destination.destination_name}
-            </p>
-
-            <p className="mt-1 text-xs text-slate-400">
-              {destination.district}, {destination.province}
-            </p>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* =====================================
-          NEARBY HOMESTAYS
-      ===================================== */}
-
-      <div className="mt-10">
-
-        <h2 className="font-display text-xl font-medium text-white">
-          Nearby homestays
-        </h2>
-
-        {nearbyHomestays.length === 0 ? (
-
-          <p className="mt-3 text-sm text-slate-400">
-            No homestays listed near this destination yet.
-          </p>
-
-        ) : (
-
-          <div className="mt-4 grid grid-cols-1 gap-6 sm:grid-cols-2">
-
-            {nearbyHomestays.map((homestay) => (
-              <HomestayCard
-                key={homestay.id}
-                homestay={homestay}
-              />
-            ))}
-
-          </div>
-
-        )}
-
-      </div>
-
-      {/* =====================================
-          REVIEWS
-      ===================================== */}
-
-      <div className="mt-10">
-
-        <h2 className="font-display text-xl font-medium text-white">
-          Traveler reviews
-        </h2>
-
-        {destinationReviews.length === 0 ? (
-
-          <p className="mt-3 text-sm text-slate-400">
-            No reviews yet for this destination.
-          </p>
-
-        ) : (
-
-          <div className="mt-4 flex flex-col gap-3">
-
-            {destinationReviews.map((review) => (
-              <ReviewCard
-                key={review.id}
-                review={review}
-              />
-            ))}
-
-          </div>
-
-        )}
-
-      </div>
-
-      {/* =====================================
-          BOOK CTA
-      ===================================== */}
-
-      <div className="mt-10 flex flex-col items-center gap-3 rounded-2xl bg-teal-900 p-8 text-center">
-
-        <h3 className="font-display text-xl font-medium text-white">
-          Ready to visit {destination.destination_name}?
-        </h3>
-
-        <Link to="/homestays">
-          <Button>
-            Book a nearby homestay
-          </Button>
+        <Link
+          to="/destinations"
+          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-terracotta-500 px-5 py-3 text-sm font-medium text-white hover:bg-terracotta-600"
+        >
+          <FaArrowLeft size={12} />
+          Back to destinations
         </Link>
 
       </div>
+    )
+  }
+
+  // =====================================================
+  // NORMALIZE DATA
+  // =====================================================
+
+  const name =
+    destination.destination_name ||
+    destination.name ||
+    'Destination'
+
+  const province =
+    destination.province || ''
+
+  const district =
+    destination.district || ''
+
+  const description =
+    destination.description ||
+    'Discover this beautiful destination in Nepal.'
+
+  const rating =
+    Number(destination.average_rating || 0)
+
+  const reviewCount =
+    Number(destination.review_count || 0)
+
+  const budget =
+    Number(
+      destination.estimated_budget_npr || 0
+    )
+
+  const popularity =
+    Number(
+      destination.popularity_score || 0
+    )
+
+  const latitude =
+    destination.latitude
+
+  const longitude =
+    destination.longitude
+
+  const duration =
+    destination.average_duration_days
+
+  const difficulty =
+    destination.difficulty_level
+
+  const familyFriendly =
+    destination.family_friendly
+
+  const travelTypes = destination.travel_type
+    ? String(destination.travel_type)
+        .split(',')
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : []
+
+  const categories =
+    destination.categories || []
+
+  const activities =
+    destination.activities || []
+
+  const images =
+    destination.images || []
+
+  const imageUrl =
+    images.length > 0
+      ? images[0].image_url
+      : null
+
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+      {/* =====================================================
+          BACK
+      ===================================================== */}
+
+      <Link
+        to="/destinations"
+        className="inline-flex items-center gap-2 text-sm font-medium text-ink-500 transition-colors hover:text-terracotta-500 dark:text-[#AAB5C0]"
+      >
+        <FaArrowLeft size={12} />
+        Back to destinations
+      </Link>
+
+      {/* =====================================================
+          HERO
+      ===================================================== */}
+
+      <section className="mt-5 overflow-hidden rounded-3xl border border-navy-900/10 bg-[#FFFCF7] shadow-sm dark:border-white/10 dark:bg-[#121C27]">
+
+        <div className="relative h-[300px] sm:h-[400px]">
+
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={name}
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display =
+                  'none'
+              }}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#102D3B] via-[#123E43] to-[#0B1C28]">
+
+              <div className="flex flex-col items-center text-center">
+
+                <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full border border-white/10 bg-white/10">
+                  <FaMountain
+                    size={34}
+                    className="text-white/70"
+                  />
+                </div>
+
+                <p className="text-base font-medium text-white/70">
+                  Destination image
+                </p>
+
+                <p className="mt-1 text-sm text-white/40">
+                  Coming soon
+                </p>
+
+              </div>
+
+            </div>
+          )}
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
+          <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+
+            <div className="flex flex-wrap items-center gap-2">
+
+              {province && (
+                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
+                  {province}
+                </span>
+              )}
+
+              {district && (
+                <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-medium text-white backdrop-blur-md">
+                  {district}
+                </span>
+              )}
+
+            </div>
+
+            <h1 className="mt-3 font-display text-3xl font-bold text-white sm:text-4xl lg:text-5xl">
+              {name}
+            </h1>
+
+            <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-white/85">
+
+              {district && (
+                <span className="flex items-center gap-1.5">
+                  <FaMapMarkerAlt
+                    size={12}
+                  />
+                  {district}, {province}
+                </span>
+              )}
+
+              <StarRating
+                rating={rating}
+                reviewCount={reviewCount}
+              />
+
+            </div>
+
+          </div>
+
+        </div>
+
+        {/* =====================================================
+            QUICK INFORMATION
+        ===================================================== */}
+
+        <div className="grid grid-cols-2 divide-x divide-y border-t border-navy-900/10 dark:divide-white/10 dark:border-white/10 sm:grid-cols-4 sm:divide-y-0">
+
+          <div className="p-5">
+            <p className="text-xs text-ink-500 dark:text-[#AAB5C0]">
+              Estimated budget
+            </p>
+
+            <p className="mt-1 font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+              NPR {budget.toLocaleString()}
+            </p>
+          </div>
+
+          <div className="p-5">
+            <p className="text-xs text-ink-500 dark:text-[#AAB5C0]">
+              Duration
+            </p>
+
+            <p className="mt-1 font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+              {duration
+                ? `${duration} days`
+                : 'Not specified'}
+            </p>
+          </div>
+
+          <div className="p-5">
+            <p className="text-xs text-ink-500 dark:text-[#AAB5C0]">
+              Difficulty
+            </p>
+
+            <p className="mt-1 font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+              {difficulty ||
+                'Not specified'}
+            </p>
+          </div>
+
+          <div className="p-5">
+            <p className="text-xs text-ink-500 dark:text-[#AAB5C0]">
+              Rating
+            </p>
+
+            <p className="mt-1 flex items-center gap-1.5 font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+              <FaStar
+                size={13}
+                className="text-amber-500"
+              />
+              {rating.toFixed(1)}
+            </p>
+          </div>
+
+        </div>
+
+      </section>
+
+      {/* =====================================================
+          MAIN CONTENT
+      ===================================================== */}
+
+      <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_320px]">
+
+        {/* LEFT */}
+        <div>
+
+          {/* ABOUT */}
+
+          <section className="rounded-2xl border border-navy-900/10 bg-[#FFFCF7] p-6 dark:border-white/10 dark:bg-[#121C27]">
+
+            <h2 className="font-display text-2xl font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+              About {name}
+            </h2>
+
+            <p className="mt-4 whitespace-pre-line text-sm leading-7 text-ink-600 dark:text-[#AAB5C0]">
+              {description}
+            </p>
+
+          </section>
+
+          {/* TRAVEL TYPES */}
+
+          {travelTypes.length > 0 && (
+            <section className="mt-6">
+
+              <h2 className="font-display text-xl font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+                Travel types
+              </h2>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+
+                {travelTypes.map(
+                  (type) => (
+                    <span
+                      key={type}
+                      className="rounded-lg bg-sand-200/70 px-3 py-2 text-sm font-medium text-[#10263A] dark:bg-white/10 dark:text-[#AAB5C0]"
+                    >
+                      {type}
+                    </span>
+                  )
+                )}
+
+              </div>
+
+            </section>
+          )}
+
+          {/* CATEGORIES */}
+
+          {categories.length > 0 && (
+            <section className="mt-6">
+
+              <h2 className="font-display text-xl font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+                Categories
+              </h2>
+
+              <div className="mt-3 flex flex-wrap gap-2">
+
+                {categories.map(
+                  (category) => (
+                    <span
+                      key={
+                        category.category_id ||
+                        category.category
+                      }
+                      className="rounded-lg bg-teal-500/10 px-3 py-2 text-sm font-medium text-teal-700 dark:text-teal-300"
+                    >
+                      {category.category}
+                    </span>
+                  )
+                )}
+
+              </div>
+
+            </section>
+          )}
+
+          {/* ACTIVITIES */}
+
+  
+
+          {activities.length > 0 && (
+            <section className="mt-6">
+
+              <h2 className="font-display text-xl font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+                Activities
+              </h2>
+
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+
+                {activities.map((activity) => (
+                  <div
+                    key={
+                      activity.activity_id ||
+                      activity.activities
+                    }
+                    className="rounded-xl border border-navy-900/10 bg-[#FFFCF7] p-3 text-sm text-[#10263A] dark:border-white/10 dark:bg-[#121C27] dark:text-[#F5F3EE]"
+                  >
+                    {activity.activities ||
+                      activity.activity ||
+                      'Activity'}
+                  </div>
+                ))}
+
+              </div>
+
+            </section>
+          )}
+
+        </div>
+
+        {/* RIGHT SIDEBAR */}
+
+        <aside>
+
+          <div className="sticky top-6 rounded-2xl border border-navy-900/10 bg-[#FFFCF7] p-6 dark:border-white/10 dark:bg-[#121C27]">
+
+            <h2 className="font-display text-xl font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+              Plan your visit
+            </h2>
+
+            <div className="mt-5 space-y-4">
+
+              {familyFriendly && (
+                <div>
+                  <p className="text-xs text-ink-500 dark:text-[#AAB5C0]">
+                    Family friendly
+                  </p>
+
+                  <p className="mt-1 text-sm font-medium text-[#10263A] dark:text-[#F5F3EE]">
+                    {familyFriendly}
+                  </p>
+                </div>
+              )}
+
+              {popularity > 0 && (
+                <div>
+                  <p className="text-xs text-ink-500 dark:text-[#AAB5C0]">
+                    Popularity score
+                  </p>
+
+                  <p className="mt-1 text-sm font-medium text-[#10263A] dark:text-[#F5F3EE]">
+                    {popularity.toFixed(0)}
+                  </p>
+                </div>
+              )}
+
+              {latitude &&
+                longitude && (
+                  <div>
+                    <p className="text-xs text-ink-500 dark:text-[#AAB5C0]">
+                      Coordinates
+                    </p>
+
+                    <p className="mt-1 text-sm font-medium text-[#10263A] dark:text-[#F5F3EE]">
+                      {Number(latitude).toFixed(
+                        4
+                      )}
+                      ,{' '}
+                      {Number(longitude).toFixed(
+                        4
+                      )}
+                    </p>
+                  </div>
+                )}
+
+            </div>
+
+          </div>
+
+        </aside>
+
+      </div>
+
+      {/* =====================================================
+          HOMESTAYS
+      ===================================================== */}
+
+      <section className="mt-12">
+
+        <div className="flex items-end justify-between gap-4">
+
+          <div>
+
+            <p className="text-xs font-semibold uppercase tracking-wider text-terracotta-500">
+              Stay nearby
+            </p>
+
+            <h2 className="mt-1 font-display text-2xl font-semibold text-[#10263A] dark:text-[#F5F3EE]">
+              Homestays in {district}
+            </h2>
+
+            <p className="mt-1 text-sm text-ink-500 dark:text-[#AAB5C0]">
+              Recommended homestays in the same district.
+            </p>
+
+          </div>
+
+          <Link
+            to={`/homestays?district=${encodeURIComponent(
+              district
+            )}`}
+            className="hidden text-sm font-medium text-terracotta-500 hover:text-terracotta-600 sm:block"
+          >
+            View all →
+          </Link>
+
+        </div>
+
+        <div className="mt-6">
+
+          {homestayLoading ? (
+            <CardSkeletonGrid count={3} />
+          ) : homestays.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-navy-900/15 p-8 text-center dark:border-white/15">
+
+              <p className="text-sm text-ink-500 dark:text-[#AAB5C0]">
+                No homestays are currently available in this district.
+              </p>
+
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+              {homestays.map(
+                (homestay) => (
+                  <HomestayCard
+                    key={
+                      homestay.homestay_id
+                    }
+                    homestay={{
+                      id:
+                        homestay.homestay_id,
+                      name:
+                        homestay.homestay_name,
+                      location:
+                        homestay.address ||
+                        homestay.municipality ||
+                        homestay.district,
+                      ownerName:
+                        homestay.municipality ||
+                        'Local host',
+                      rating:
+                        Number(
+                          homestay.rating || 0
+                        ),
+                      reviewCount:
+                        Number(
+                          homestay.review_count ||
+                            0
+                        ),
+                      amenities:
+                        homestay.amenities
+                          ? String(
+                              homestay.amenities
+                            )
+                              .split(',')
+                              .map(
+                                (item) =>
+                                  item.trim()
+                              )
+                              .filter(Boolean)
+                          : [],
+                      price:
+                        Number(
+                          homestay.price_per_night_npr ||
+                            0
+                        ),
+                      availability:
+                        'Available',
+                      image: null,
+                    }}
+                  />
+                )
+              )}
+
+            </div>
+          )}
+
+        </div>
+
+      </section>
 
     </div>
   )

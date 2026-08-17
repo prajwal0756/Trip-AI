@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.core.dependencies import get_current_user
-
+from fastapi.security import OAuth2PasswordRequestForm
 from app.models.user import User
 
 from app.schemas.user import UserRegister
@@ -84,7 +84,31 @@ def login(
 
     return result
 
+# =====================================================
+# SWAGGER / OAUTH2 LOGIN
+# =====================================================
 
+@router.post(
+    "/token",
+    response_model=TokenResponse,
+)
+def token(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: Session = Depends(get_db),
+):
+    result = login_user(
+        db,
+        form_data.username,
+        form_data.password,
+    )
+
+    if result is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+        )
+
+    return result
 # =====================================================
 # CURRENT USER
 # =====================================================

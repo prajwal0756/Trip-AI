@@ -16,28 +16,38 @@ export default function Register() {
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+
     if (form.password !== form.confirmPassword) {
       setError('Passwords do not match.')
       return
     }
+
     if (form.password.length < 6) {
       setError('Password must be at least 6 characters.')
       return
     }
+
     setLoading(true)
-    setTimeout(() => {
-      const result = register({ ...form, role })
-      setLoading(false)
-      if (!result.success) {
-        setError(result.message)
-        return
-      }
-      pushToast(`Welcome to TripAI, ${result.user.fullName.split(' ')[0]}!`)
-      navigate(role === 'owner' ? '/owner' : '/dashboard')
-    }, 500)
+
+    const result = await register({
+      fullName: form.fullName,
+      email: form.email,
+      password: form.password,
+    })
+
+    setLoading(false)
+
+    if (!result.success) {
+      setError(result.message)
+      return
+    }
+
+    pushToast('Account created successfully! Please log in.')
+
+    navigate('/login')
   }
 
   return (

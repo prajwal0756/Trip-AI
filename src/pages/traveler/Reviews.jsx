@@ -5,6 +5,8 @@ import Button from '../../components/shared/Button'
 import EmptyState from '../../components/shared/EmptyState'
 import { useAuth } from '../../context/AuthContext'
 import { useApp } from '../../context/AppContext'
+import api from '../../api/client'
+import { currentTravelerId } from '../../data/users'
 
 export default function Reviews() {
   const { user } = useAuth()
@@ -12,29 +14,105 @@ export default function Reviews() {
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState('')
   const [targetId, setTargetId] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
-  const myCompletedHomestays = bookings
-    .filter((b) => b.travelerId === user.id && b.status === 'completed')
-    .map((b) => homestays.find((h) => h.id === b.homestayId))
+  const completedBookings = bookings.filter(
+    (booking) =>
+      booking.status === 'completed' &&
+      booking.travelerId === currentTravelerId
+  )
+
+  const myCompletedHomestays = completedBookings
+    .map((booking) =>
+      homestays.find(
+        (homestay) =>
+          String(homestay.id) === String(booking.homestayId)
+      )
+    )
     .filter(Boolean)
 
   const myReviews = reviews.filter((r) => r.travelerId === user.id)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+
     if (!targetId || !comment.trim()) return
-    addReview({
-      targetType: 'homestay',
-      targetId,
-      travelerId: user.id,
-      travelerName: user.fullName,
-      avatar: user.avatar,
-      rating,
-      comment: comment.trim(),
-    })
-    setComment('')
-    setRating(5)
-    setTargetId('')
+
+    try {
+      setSubmitting(true)
+      setSubmitError('')
+
+      let sentiment = null
+
+      // ---------------------------------------------
+      // AI SENTIMENT ANALYSIS
+      // ---------------------------------------------
+
+      try {
+        const response = await api.post(
+          '/ai/sentiment',
+          {
+            text: comment.trim(),
+            star_rating: rating,
+          }
+        )
+
+        sentiment = response.data
+      } catch (error) {
+        console.error(
+          'Sentiment analysis failed:',
+          error
+        )
+      }
+
+      // ---------------------------------------------
+      // SAVE REVIEW
+      // ---------------------------------------------
+
+      addReview({
+        targetType: 'homestay',
+        targetId,
+
+        travelerId: user.id,
+        travelerName: user.fullName,
+        avatar: user.avatar,
+
+        rating,
+        comment: comment.trim(),
+
+        sentiment: sentiment
+          ? {
+              label: sentiment.overall_label,
+              score: sentiment.overall_score,
+              confidence: sentiment.confidence,
+              mismatchFlag: sentiment.mismatch_flag,
+              clauses: sentiment.clauses || [],
+            }
+          : null,
+      })
+
+      // ---------------------------------------------
+      // RESET
+      // ---------------------------------------------
+
+      setComment('')
+      setRating(5)
+      setTargetId('')
+
+    } catch (error) {
+      console.error(
+        'Failed to submit review:',
+        error
+      )
+
+      setSubmitError(
+        'Unable to submit your review. Please try again.'
+      )
+
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (

@@ -52,3 +52,9 @@ dist-ssr/
 
 # ML generated/cache files
 *.pyc
+# SQLite temporary files
+*.db-shm
+*.db-wal
+
+# Local backup files
+*.backup.*

@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from sqlalchemy import or_, asc, desc, func
+from sqlalchemy import or_, desc, func, case
 
 from app.models.destination import Destination
 
@@ -49,9 +49,103 @@ def search_destinations(
     db: Session,
     query: str,
 ):
-    search = f"%{query.strip()}%"
+    search_text = query.strip()
+
+    if not search_text:
+        return []
+
+    search = f"%{search_text}%"
+
+    # -------------------------------------------------
+    # First try to find the exact destination.
+    # This allows us to find its district and return
+    # nearby destinations from the same district.
+    # -------------------------------------------------
+
+    target = (
+        db.query(Destination)
+        .filter(
+            func.lower(
+                Destination.destination_name
+            ) == search_text.lower()
+        )
+        .first()
+    )
+
+    target_district = None
+
+    if target:
+        target_district = target.district
+
+    # -------------------------------------------------
+    # Search results
+    # -------------------------------------------------
+
+    conditions = [
+        Destination.destination_name.ilike(search),
+        Destination.district.ilike(search),
+        Destination.province.ilike(search),
+        Destination.region.ilike(search),
+        Destination.category.ilike(search),
+        Destination.travel_type.ilike(search),
+        Destination.activities_text.ilike(search),
+        Destination.description.ilike(search),
+    ]
+
+    # If exact destination exists, also include
+    # destinations from the same district.
+    if target_district:
+        conditions.append(
+            Destination.district.ilike(target_district)
+        )
+
+    # -------------------------------------------------
+    # Relevance ordering
+    #
+    # 0 = exact destination
+    # 1 = same district
+    # 2 = other search matches
+    # -------------------------------------------------
+
+    relevance_order = case(
+        (
+            func.lower(
+                Destination.destination_name
+            ) == search_text.lower(),
+            0,
+        ),
+        (
+            target_district is not None,
+            case(
+                (
+                    func.lower(
+                        Destination.district
+                    ) == target_district.lower(),
+                    1,
+                ),
+                else_=2,
+            ),
+        ),
+        else_=2,
+    )
 
     return (
+        db.query(Destination)
+        .filter(or_(*conditions))
+        .order_by(
+            relevance_order.asc(),
+            Destination.popularity_score.desc(),
+            Destination.average_rating.desc(),
+        )
+        .limit(20)
+        .all()
+    )
+
+    # -------------------------------------------------
+    # Find direct text matches
+    # -------------------------------------------------
+
+    direct_matches = (
         db.query(Destination)
         .filter(
             or_(
@@ -66,10 +160,120 @@ def search_destinations(
             )
         )
         .order_by(
-            Destination.popularity_score.desc()
+            desc(Destination.popularity_score),
+            desc(Destination.average_rating),
         )
         .all()
     )
+
+    if not direct_matches:
+        return []
+
+    # -------------------------------------------------
+    # Choose best matching destination as reference
+    # -------------------------------------------------
+
+    exact_name_match = next(
+        (
+            destination
+            for destination in direct_matches
+            if destination.destination_name
+            and destination.destination_name.lower().strip()
+            == cleaned_query.lower()
+        ),
+        None,
+    )
+
+    reference = exact_name_match or direct_matches[0]
+
+    # -------------------------------------------------
+    # Start result list with direct matches
+    # -------------------------------------------------
+
+    results = []
+    seen_ids = set()
+
+    # Exact name first
+    if exact_name_match:
+        results.append(exact_name_match)
+        seen_ids.add(exact_name_match.destination_id)
+
+    # Other direct text matches
+    for destination in direct_matches:
+        if destination.destination_id not in seen_ids:
+            results.append(destination)
+            seen_ids.add(destination.destination_id)
+
+    # -------------------------------------------------
+    # Find nearby destinations
+    #
+    # Uses simple latitude/longitude distance.
+    # This is sufficient for TripAI search ranking.
+    # -------------------------------------------------
+
+    if (
+        reference.latitude is not None
+        and reference.longitude is not None
+    ):
+        nearby = (
+            db.query(Destination)
+            .filter(
+                Destination.destination_id
+                != reference.destination_id,
+
+                Destination.latitude.isnot(None),
+                Destination.longitude.isnot(None),
+            )
+            .order_by(
+                (
+                    func.power(
+                        Destination.latitude
+                        - reference.latitude,
+                        2,
+                    )
+                    +
+                    func.power(
+                        Destination.longitude
+                        - reference.longitude,
+                        2,
+                    )
+                ).asc()
+            )
+            .limit(10)
+            .all()
+        )
+
+        # -------------------------------------------------
+        # Add nearby destinations
+        #
+        # Prefer same district first.
+        # -------------------------------------------------
+
+        same_district = [
+            destination
+            for destination in nearby
+            if destination.district
+            and reference.district
+            and destination.district.lower().strip()
+            == reference.district.lower().strip()
+        ]
+
+        other_nearby = [
+            destination
+            for destination in nearby
+            if destination not in same_district
+        ]
+
+        for destination in same_district + other_nearby:
+            if destination.destination_id not in seen_ids:
+                results.append(destination)
+                seen_ids.add(destination.destination_id)
+
+    # -------------------------------------------------
+    # Limit search result size
+    # -------------------------------------------------
+
+    return results[:20]
 
 
 # =====================================================
@@ -139,7 +343,9 @@ def filter_destinations(
 
     return (
         query
-        .order_by(Destination.popularity_score.desc())
+        .order_by(
+            Destination.popularity_score.desc()
+        )
         .all()
     )
 
@@ -179,9 +385,8 @@ def get_top_rated_destinations(
         .all()
     )
 
-
 # =====================================================
-# BUDGET DESTINATIONS
+# BUDGET FRIENDLY DESTINATIONS
 # =====================================================
 
 def get_budget_destinations(
@@ -190,11 +395,8 @@ def get_budget_destinations(
 ):
     return (
         db.query(Destination)
-        .filter(
-            Destination.estimated_budget_npr.isnot(None)
-        )
         .order_by(
-            asc(Destination.estimated_budget_npr)
+            Destination.estimated_budget_npr.asc()
         )
         .limit(limit)
         .all()
@@ -202,125 +404,76 @@ def get_budget_destinations(
 
 
 # =====================================================
-# PROVINCES
+# METADATA
 # =====================================================
 
 def get_provinces(db: Session):
-
-    rows = (
+    return (
         db.query(Destination.province)
-        .filter(Destination.province.isnot(None))
         .distinct()
         .order_by(Destination.province)
         .all()
     )
 
-    return [
-        row[0]
-        for row in rows
-    ]
-
-
-# =====================================================
-# DISTRICTS
-# =====================================================
 
 def get_districts(db: Session):
-
-    rows = (
+    return (
         db.query(Destination.district)
-        .filter(Destination.district.isnot(None))
         .distinct()
         .order_by(Destination.district)
         .all()
     )
 
-    return [
-        row[0]
-        for row in rows
-    ]
-
-
-# =====================================================
-# CATEGORIES
-# =====================================================
 
 def get_categories(db: Session):
-
-    rows = (
+    return (
         db.query(Destination.category)
-        .filter(Destination.category.isnot(None))
         .distinct()
         .order_by(Destination.category)
         .all()
     )
 
-    return [
-        row[0]
-        for row in rows
-    ]
-
-
-# =====================================================
-# TRAVEL TYPES
-# =====================================================
 
 def get_travel_types(db: Session):
-
-    rows = (
+    return (
         db.query(Destination.travel_type)
-        .filter(Destination.travel_type.isnot(None))
         .distinct()
         .order_by(Destination.travel_type)
         .all()
     )
-
-    return [
-        row[0]
-        for row in rows
-    ]
 
 
 # =====================================================
 # STATISTICS
 # =====================================================
 
-def get_destination_statistics(
-    db: Session,
-):
-
+def get_destination_statistics(db: Session):
     total = (
         db.query(
-            func.count(
-                Destination.destination_id
-            )
-        )
-        .scalar()
+            func.count(Destination.destination_id)
+        ).scalar()
     )
 
     provinces = (
         db.query(Destination.province)
-        .filter(Destination.province.isnot(None))
         .distinct()
         .count()
     )
 
     districts = (
         db.query(Destination.district)
-        .filter(Destination.district.isnot(None))
         .distinct()
         .count()
     )
 
     categories = (
         db.query(Destination.category)
-        .filter(Destination.category.isnot(None))
         .distinct()
         .count()
     )
 
     return {
-        "total_destinations": total or 0,
+        "total_destinations": total,
         "total_provinces": provinces,
         "total_districts": districts,
         "total_categories": categories,
@@ -336,20 +489,46 @@ def get_similar_destinations(
     destination_id: int,
 ):
     """
-    Temporary database fallback.
+    Temporary similar-destination function.
 
-    The real AI similarity model will be connected
-    to this endpoint after the basic API is stable.
+    Finds destinations from the same district
+    or province. Later this can be replaced
+    with the recommendation model.
     """
 
-    return (
+    destination = (
+        db.query(Destination)
+        .filter(
+            Destination.destination_id == destination_id
+        )
+        .first()
+    )
+
+    if not destination:
+        return []
+
+    query = (
         db.query(Destination)
         .filter(
             Destination.destination_id != destination_id
         )
-        .order_by(
-            Destination.popularity_score.desc()
+    )
+
+    if destination.district:
+        query = query.filter(
+            Destination.district.ilike(
+                destination.district
+            )
         )
-        .limit(5)
+
+    results = (
+        query
+        .order_by(
+            Destination.popularity_score.desc(),
+            Destination.average_rating.desc(),
+        )
+        .limit(6)
         .all()
     )
+
+    return results

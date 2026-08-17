@@ -8,7 +8,8 @@ import Button from '../shared/Button'
 const navLinks = [
   { to: '/', label: 'Home' },
   { to: '/destinations', label: 'Destinations' },
-  { to: '/recommendations', label: 'AI Recommendation' },
+  { to: '/ai-assistant', label: 'TripAI Assistant ✨' },
+  { to: '/recommendations', label: 'Explore by Preferences' },
   { to: '/homestays', label: 'Homestays' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
@@ -141,6 +142,9 @@ export default function Navbar() {
                   <Button size="sm" onClick={() => { setOpen(false); navigate('/register') }}>
                     Get started
                   </Button>
+                  <Link to="/ai-assistant">
+                    TripAI Assistant
+                  </Link>
                 </>
               )}
             </div>

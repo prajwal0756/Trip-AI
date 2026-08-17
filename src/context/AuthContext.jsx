@@ -1,83 +1,130 @@
-import { createContext, useContext, useState, useCallback } from 'react'
-import { users as mockUsers } from '../data/users'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
+import api from '../api/client'
 
 const AuthContext = createContext(null)
-const SESSION_KEY = 'tripai_session_user_id'
+const TOKEN_KEY = 'tripai_access_token'
 
-function loadInitialUser(allUsers) {
-  try {
-    const savedId = localStorage.getItem(SESSION_KEY)
-    if (!savedId) return null
-    return allUsers.find((u) => u.id === savedId) || null
-  } catch {
-    return null
+function normalizeUser(user) {
+  if (!user) return null
+
+  return {
+    ...user,
+    id: String(user.user_id ?? user.id),
+    fullName: user.full_name ?? user.fullName,
+    role: user.role === 'user' ? 'traveler' : user.role,
+    avatar: user.profile_image ?? user.avatar ?? null,
+    joinedDate: user.created_at ?? user.joinedDate ?? null,
   }
 }
 
 export function AuthProvider({ children }) {
-  const [allUsers, setAllUsers] = useState(mockUsers)
-  const [user, setUser] = useState(() => loadInitialUser(mockUsers))
+  const [user, setUser] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const persistSession = (nextUser) => {
-    try {
-      if (nextUser) localStorage.setItem(SESSION_KEY, nextUser.id)
-      else localStorage.removeItem(SESSION_KEY)
-    } catch {
-      // localStorage unavailable (e.g. private browsing) — session just won't persist
+  // Restore logged-in user when the app starts
+  useEffect(() => {
+    const token = localStorage.getItem(TOKEN_KEY)
+
+    if (!token) {
+      setLoading(false)
+      return
     }
-  }
 
-  const login = useCallback(
-    (email, password) => {
-      const found = allUsers.find((u) => u.email === email && u.password === password)
-      if (!found) {
-        return { success: false, message: 'Incorrect email or password.' }
-      }
-      setUser(found)
-      persistSession(found)
-      return { success: true, user: found }
-    },
-    [allUsers]
-  )
+    api
+      .get('/auth/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setUser(normalizeUser(response.data))
+      })
+      .catch(() => {
+        localStorage.removeItem(TOKEN_KEY)
+        setUser(null)
+      })
+      .finally(() => {
+        setLoading(false)
+      })
+  }, [])
 
-  const register = useCallback(
-    ({ fullName, email, password, role }) => {
-      const exists = allUsers.some((u) => u.email === email)
-      if (exists) {
-        return { success: false, message: 'An account with this email already exists.' }
-      }
-      const newUser = {
-        id: `u_${role}_${Date.now()}`,
-        role,
-        fullName,
+  const login = useCallback(async (email, password) => {
+    try {
+      const response = await api.post('/auth/login', {
         email,
         password,
-        avatar: `https://i.pravatar.cc/150?u=${email}`,
-        joinedDate: new Date().toISOString().slice(0, 10),
+      })
+
+      const { access_token } = response.data
+
+      localStorage.setItem(TOKEN_KEY, access_token)
+
+      const userResponse = await api.get('/auth/me', {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+        },
+      })
+
+      const loggedInUser = normalizeUser(userResponse.data)
+      setUser(loggedInUser)
+
+      return {
+        success: true,
+        user: loggedInUser,
       }
-      setAllUsers((prev) => [...prev, newUser])
-      setUser(newUser)
-      persistSession(newUser)
-      return { success: true, user: newUser }
-    },
-    [allUsers]
-  )
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.detail ||
+          'Unable to login. Please try again.',
+      }
+    }
+  }, [])
+
+  const register = useCallback(async ({ fullName, email, password, phoneNumber }) => {
+    try {
+      const response = await api.post('/auth/register', {
+        full_name: fullName,
+        email,
+        password,
+        phone_number: phoneNumber || null,
+      })
+
+      return {
+        success: true,
+        user: normalizeUser(response.data),
+      }
+    } catch (error) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.detail ||
+          'Unable to register. Please try again.',
+      }
+    }
+  }, [])
 
   const logout = useCallback(() => {
+    localStorage.removeItem(TOKEN_KEY)
     setUser(null)
-    persistSession(null)
   }, [])
 
   const updateProfile = useCallback((updates) => {
-    setUser((prev) => {
-      const next = prev ? { ...prev, ...updates } : prev
-      if (next) persistSession(next)
-      return next
-    })
+    setUser((prev) => (prev ? { ...prev, ...updates } : prev))
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, updateProfile }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        updateProfile,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )
@@ -85,6 +132,10 @@ export function AuthProvider({ children }) {
 
 export function useAuth() {
   const ctx = useContext(AuthContext)
-  if (!ctx) throw new Error('useAuth must be used within AuthProvider')
+
+  if (!ctx) {
+    throw new Error('useAuth must be used within AuthProvider')
+  }
+
   return ctx
 }

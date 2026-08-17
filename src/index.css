@@ -65,15 +65,7 @@ html.dark body {
   background-color: #0B1117 !important;
 }
 
-/* Headings in Dark Mode */
-html.dark h1,
-html.dark h2,
-html.dark h3,
-html.dark h4,
-html.dark h5,
-html.dark h6 {
-  color: #F8FAFC !important;
-}
+
 
 /* Eyebrows in Dark Mode */
 html.dark .text-terracotta-500 {
@@ -91,11 +83,7 @@ html.dark .bg-white {
   border-color: rgba(255, 255, 255, 0.1) !important;
 }
 
-/* Text overrides in Dark Mode */
-html.dark .text-navy-950,
-html.dark .text-ink-900 {
-  color: #F8FAFC !important;
-}
+
 
 html.dark .text-ink-500,
 html.dark .text-ink-700 {

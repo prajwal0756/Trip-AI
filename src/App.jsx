@@ -17,9 +17,11 @@ import Destinations from './pages/public/Destinations'
 import DestinationDetails from './pages/public/DestinationDetails'
 import Homestays from './pages/public/Homestays'
 import NotFound from './pages/public/NotFound'
+import AIAssistant from './pages/public/AIAssistant'
 
 import TravelerDashboard from './pages/traveler/TravelerDashboard'
 import RecommendationForm from './pages/traveler/RecommendationForm'
+import TripAIAssistant from './pages/traveler/TripAIAssistant'
 import Bookings from './pages/traveler/Bookings'
 import Favorites from './pages/traveler/Favorites'
 import Reviews from './pages/traveler/Reviews'
@@ -47,6 +49,7 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/destinations" element={<Destinations />} />
+              <Route path="/ai-assistant" element={<AIAssistant />} />
               <Route path="/destination/:id" element={<DestinationDetails />} />
               <Route path="/homestays" element={<Homestays />} />
             </Route>
@@ -61,6 +64,7 @@ export default function App() {
             >
               <Route path="/dashboard" element={<TravelerDashboard />} />
               <Route path="/recommendations" element={<RecommendationForm />} />
+              <Route path="/ai-assistant" element={<TripAIAssistant />} />
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/favorites" element={<Favorites />} />
               <Route path="/reviews" element={<Reviews />} />

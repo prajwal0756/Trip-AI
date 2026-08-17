@@ -15,20 +15,23 @@ export default function Login() {
 
   const handleChange = (e) => setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
     setLoading(true)
-    setTimeout(() => {
-      const result = login(form.email, form.password)
-      setLoading(false)
-      if (!result.success) {
-        setError(result.message)
-        return
-      }
-      pushToast(`Welcome back, ${result.user.fullName.split(' ')[0]}!`)
-      navigate(result.user.role === 'owner' ? '/owner' : '/dashboard')
-    }, 500)
+
+    const result = await login(form.email, form.password)
+
+    setLoading(false)
+
+    if (!result.success) {
+      setError(result.message)
+      return
+    }
+
+    pushToast(`Welcome back, ${result.user.full_name.split(' ')[0]}!`)
+
+    navigate(result.user.role === 'owner' ? '/owner' : '/dashboard')
   }
 
   const fillDemo = (role) => {
