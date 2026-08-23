@@ -870,6 +870,10 @@ export default function DestinationDetails() {
   // SUBMIT DESTINATION REVIEW
   // =====================================================
 
+  // =====================================================
+  // SUBMIT DESTINATION REVIEW
+  // =====================================================
+
   const handleReviewSubmit = async (e) => {
     e.preventDefault()
 
@@ -941,20 +945,56 @@ export default function DestinationDetails() {
 
       setReviewText('')
       setReviewRating(5)
-    } catch (err) {
+
+    } catch (error) {
       console.error(
         'Failed to submit destination review:',
-        err
+        error
       )
 
-      setReviewError(
-        err.response?.data?.detail ||
-          'Unable to submit your review. Please try again.'
-      )
+      const detail =
+        error.response?.data?.detail
+
+      let message =
+        'Unable to submit your review. Please try again.'
+
+      if (typeof detail === 'string') {
+        message = detail
+
+      } else if (Array.isArray(detail)) {
+        message = detail
+          .map((item) => {
+            if (typeof item === 'string') {
+              return item
+            }
+
+            if (item?.msg) {
+              return item.msg
+            }
+
+            return 'Invalid review data.'
+          })
+          .join(', ')
+
+      } else if (
+        detail &&
+        typeof detail === 'object'
+      ) {
+        message =
+          detail.msg ||
+          'Invalid review data.'
+      }
+
+      setReviewError(message)
+
     } finally {
       setReviewLoading(false)
     }
   }
+
+
+
+
 
   // =====================================================
   // LOADING
