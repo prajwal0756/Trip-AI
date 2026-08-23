@@ -6,7 +6,7 @@ import EmptyState from '../../components/shared/EmptyState'
 import { useAuth } from '../../context/AuthContext'
 import { useApp } from '../../context/AppContext'
 import api from '../../api/client'
-import { currentTravelerId } from '../../data/users'
+// import { currentTravelerId } from '../../data/users'
 
 export default function Reviews() {
   const { user } = useAuth()
@@ -20,7 +20,7 @@ export default function Reviews() {
   const completedBookings = bookings.filter(
     (booking) =>
       booking.status === 'completed' &&
-      booking.travelerId === currentTravelerId
+      String(booking.travelerId) === String(user.id)
   )
 
   const myCompletedHomestays = completedBookings

@@ -88,7 +88,7 @@ export default function Destinations() {
           rating: Number(destination.average_rating || 0),
           reviewCount: destination.review_count || 0,
           description: destination.description || '',
-          image: null,
+          image: destination.images?.[0]?.image_url || null,
 
           travelType: destination.travel_type
             ? destination.travel_type

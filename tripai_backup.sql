@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict cAnH61QQ9lrPmkSoPxmPcBzYOIZrRdG0l8QnRcW7pHwHyb5g6Zi1qv8QHOoJ86o
+\restrict zgBOsyjOguXXiQAH7UKYqdyo6jjTbDyaaZ1z0jDkBbE1Htp1wizyq9xL5tKOCwh
 
 -- Dumped from database version 18.4
 -- Dumped by pg_dump version 18.4 (Homebrew)
@@ -73,7 +73,8 @@ CREATE TABLE public.bookings (
     guests integer NOT NULL,
     total_price double precision NOT NULL,
     status character varying(20) NOT NULL,
-    created_at timestamp without time zone DEFAULT now() NOT NULL
+    created_at timestamp without time zone DEFAULT now() NOT NULL,
+    owner_id integer
 );
 
 
@@ -751,12 +752,13 @@ COPY public.activities (activity_id, activities, description, difficulty_level, 
 -- Data for Name: bookings; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.bookings (booking_id, user_id, homestay_id, check_in, check_out, guests, total_price, status, created_at) FROM stdin;
-2	3	BAG004	2026-08-17	2026-08-20	4	4500	upcoming	2026-08-17 15:53:42.897454
-3	3	BAG025	2026-08-06	2026-08-27	1	25200	upcoming	2026-08-17 15:54:19.505132
-4	3	BAG004	2026-08-19	2026-08-29	1	15000	upcoming	2026-08-17 15:57:45.47103
-5	3	BAG043	2026-08-13	2026-08-19	1	14400	upcoming	2026-08-17 15:58:33.763692
-6	3	BAG043	2026-08-13	2026-08-27	1	33600	cancelled	2026-08-17 16:04:55.048739
+COPY public.bookings (booking_id, user_id, homestay_id, check_in, check_out, guests, total_price, status, created_at, owner_id) FROM stdin;
+2	3	BAG004	2026-08-17	2026-08-20	4	4500	upcoming	2026-08-17 15:53:42.897454	\N
+3	3	BAG025	2026-08-06	2026-08-27	1	25200	upcoming	2026-08-17 15:54:19.505132	\N
+4	3	BAG004	2026-08-19	2026-08-29	1	15000	upcoming	2026-08-17 15:57:45.47103	\N
+5	3	BAG043	2026-08-13	2026-08-19	1	14400	upcoming	2026-08-17 15:58:33.763692	\N
+6	3	BAG043	2026-08-13	2026-08-27	1	33600	cancelled	2026-08-17 16:04:55.048739	\N
+7	7	BAG004	2026-08-24	2026-08-28	1	6000	upcoming	2026-08-23 20:56:25.174461	\N
 \.
 
 
@@ -9722,6 +9724,312 @@ BAG043	Nagarkot Sunrise Ridge Homestay	Bhaktapur	Bagmati	Nagarkot Municipality	N
 --
 
 COPY public.images (image_id, destination_id, image_url, image_type, uploaded_at) FROM stdin;
+1	754	/destination-images/754 - Chhangru Village.jfif	jfif	2026-08-23 22:40:06.263648
+2	776	/destination-images/776 - Jayaprithvi Highway Viewpoint.jfif	jfif	2026-08-23 22:40:06.263648
+3	752	/destination-images/752 - Malikarjun Temple.jfif	jfif	2026-08-23 22:40:06.263648
+4	927	/destination-images/927 Lumbini Crane Sanctuary.jpg	jpg	2026-08-23 22:40:06.263648
+5	769	/destination-images/769 - Chainpur.jpg	jpg	2026-08-23 22:40:06.263648
+6	916	/destination-images/916 Jitgadh Fort.jpg	jpg	2026-08-23 22:40:06.263648
+7	908	/destination-images/908 scared garden(lumbini).jpg	jpg	2026-08-23 22:40:06.263648
+8	933	/destination-images/933 Sri Lankan Buddhist Temple (Lumbini).jpg	jpg	2026-08-23 22:40:06.263648
+9	736	/destination-images/736 - Shaileshwari Temple.jfif	jfif	2026-08-23 22:40:06.263648
+10	727	/destination-images/727 - Dadeldhura Bazaar.jfif	jfif	2026-08-23 22:40:06.263648
+11	775	/destination-images/775 - Bitthadchir.jpg	jpg	2026-08-23 22:40:06.263648
+12	954	/destination-images/954 Binayi Tribeni.jpg	jpg	2026-08-23 22:40:06.263648
+13	929	/destination-images/929 Japanese Buddhist Temple (Lumbini).jpg	jpg	2026-08-23 22:40:06.263648
+14	938	/destination-images/938 Mayadevi Rural Municipality Corridor.jpg	jpg	2026-08-23 22:40:06.263648
+15	945	/destination-images/945 Gotihawa.jpg	jpg	2026-08-23 22:40:06.263648
+16	959	/destination-images/959 Mayadevi Rural Municipality (Kapilvastu).jpg	jpg	2026-08-23 22:40:06.263648
+17	731	/destination-images/731 - Amargadhi View Tower.jfif	jfif	2026-08-23 22:40:06.263648
+18	960	/destination-images/960 Yasodhara Heritage Village.webp	webp	2026-08-23 22:40:06.263648
+19	732	/destination-images/732 - Khaptad National Park (Dadeldhura Entry).jfif	jfif	2026-08-23 22:40:06.263648
+20	922	/destination-images/922 Manimukunda Sen Park (Phulbari).jpg	jpg	2026-08-23 22:40:06.263648
+21	923	/destination-images/923 Manigram.jfif	jfif	2026-08-23 22:40:06.263648
+22	962	/destination-images/962 Ganeshpur Border Area.jfif	jfif	2026-08-23 22:40:06.263648
+23	806	/destination-images/806 - Mohanpur Community Forest.jfif	jfif	2026-08-23 22:40:06.263648
+24	784	/destination-images/784 - Mahakali Corridor.jpg	jpg	2026-08-23 22:40:06.263648
+25	714	/destination-images/714 - Ghodaghodi Lake.jfif	jfif	2026-08-23 22:40:06.263648
+26	791	/destination-images/791 - Dashrath Chand Memorial Park.jpg	jpg	2026-08-23 22:40:06.263648
+27	785	/destination-images/785 - Naugad Valley.jfif	jfif	2026-08-23 22:40:06.263648
+28	713	/destination-images/713 - Bhimdatta City.webp	webp	2026-08-23 22:40:06.263648
+29	914	/destination-images/914 Butwal.jpg	jpg	2026-08-23 22:40:06.263648
+30	963	/destination-images/963 Gorusinghe Junction (Kapilvastu).jpg	jpg	2026-08-23 22:40:06.263648
+31	804	/destination-images/804 - Joshipur Wetlands.jfif	jfif	2026-08-23 22:40:06.263648
+32	762	/destination-images/762 - Niglasain Temple.jfif	jfif	2026-08-23 22:40:06.263648
+33	917	/destination-images/917 Gajedi Taal.jpg	jpg	2026-08-23 22:40:06.263648
+34	796	/destination-images/796 - Budhiganga Riverside.jfif	jfif	2026-08-23 22:40:06.263648
+35	805	/destination-images/805 - Lamki Bazaar.jpg	jpg	2026-08-23 22:40:06.263648
+36	765	/destination-images/765 - Martadi.jpg	jpg	2026-08-23 22:40:06.263648
+37	795	/destination-images/795 - Sanfebagar Airport Viewpoint.jpg	jpg	2026-08-23 22:40:06.263648
+38	782	/destination-images/782 - Rapla.jpg	jpg	2026-08-23 22:40:06.263648
+39	792	/destination-images/792 - Seti River Viewpoint.jpg	jpg	2026-08-23 22:40:06.263648
+40	766	/destination-images/766 - Budhinanda Lake.jfif	jfif	2026-08-23 22:40:06.263648
+41	948	/destination-images/948 Jagadishpur Reservoir.png	png	2026-08-23 22:40:06.263648
+42	755	/destination-images/755 - Tinkar Village.webp	webp	2026-08-23 22:40:06.263648
+43	742	/destination-images/742 - Ramaroshan Grasslands.jfif	jfif	2026-08-23 22:40:06.263648
+44	961	/destination-images/961 Bijayanagar (Kapilvastu).jfif	jfif	2026-08-23 22:40:06.263648
+45	925	/destination-images/925 Tamakoshi River (Tinau River Corridor).jpg	jpg	2026-08-23 22:40:06.263648
+46	751	/destination-images/751 - Khalanga Darchula.jpg	jpg	2026-08-23 22:40:06.263648
+47	773	/destination-images/773 - Saipal Himal.png	png	2026-08-23 22:40:06.263648
+48	931	/destination-images/931 Chinese Buddhist Temple (Lumbini).jfif	jfif	2026-08-23 22:40:06.263648
+49	726	/destination-images/726 - Hasuliya Forest.webp	webp	2026-08-23 22:40:06.263648
+50	949	/destination-images/949 Shivagadhi Fort.jfif	jfif	2026-08-23 22:40:06.263648
+51	935	/destination-images/935 Lumbini Research Institute.jpg	jpg	2026-08-23 22:40:06.263648
+52	957	/destination-images/957 Paderia Rural Area (Kapilvastu).webp	webp	2026-08-23 22:40:06.263648
+53	790	/destination-images/790 - Surnaya Valley.jfif	jfif	2026-08-23 22:40:06.263648
+54	787	/destination-images/787 - Dogadakedar Temple.jfif	jfif	2026-08-23 22:40:06.263648
+55	938	/destination-images/938 Kotahimai Rural Area.jpg	jpg	2026-08-23 22:40:06.263648
+56	926	/destination-images/926Saljhandi (Rupandehi).jpg	jpg	2026-08-23 22:40:06.263648
+57	734	/destination-images/734 - Khaptad National Park (Doti Entry).jfif	jfif	2026-08-23 22:40:06.263648
+58	779	/destination-images/779 - Gaumul.jpg	jpg	2026-08-23 22:40:06.263648
+59	768	/destination-images/768 - Khaptad Lake.jpg	jpg	2026-08-23 22:40:06.263648
+60	934	/destination-images/934 Lumbini Museum.jpg	jpg	2026-08-23 22:40:06.263648
+61	725	/destination-images/725 - Patharaiya River.jpg	jpg	2026-08-23 22:40:06.263648
+62	781	/destination-images/781 - Pandusen.jpg	jpg	2026-08-23 22:40:06.263648
+63	947	/destination-images/947 Sagarhawa.jfif	jfif	2026-08-23 22:40:06.263648
+64	767	/destination-images/767 - Khaptad National Park (Bajhang Entry).jfif	jfif	2026-08-23 22:40:06.263648
+65	748	/destination-images/748 - Api Base Camp.jfif	jfif	2026-08-23 22:40:06.263648
+66	730	/destination-images/730 - Bhageshwor Temple.jpg	jpg	2026-08-23 22:40:06.263648
+67	946	/destination-images/946 Niglihawa.jpg	jpg	2026-08-23 22:40:06.263648
+68	941	/destination-images/941.jfif	jfif	2026-08-23 22:40:06.263648
+69	739	/destination-images/739 - Mastamandu Temple.jfif	jfif	2026-08-23 22:40:06.263648
+70	717	/destination-images/717 - Mohanpur Lake.webp	webp	2026-08-23 22:40:06.263648
+71	761	/destination-images/761 - Jhulaghat Suspension Bridge.jpg	jpg	2026-08-23 22:40:06.263648
+72	735	/destination-images/735 - Silgadhi.jfif	jfif	2026-08-23 22:40:06.263648
+73	951	/destination-images/951 Krishnanagar Border Town.jpg	jpg	2026-08-23 22:40:06.263648
+74	800	/destination-images/800 - Dodhara Riverside Park.jpg	jpg	2026-08-23 22:40:06.263648
+75	723	/destination-images/723 - Karnali River.jfif	jfif	2026-08-23 22:40:06.263648
+76	788	/destination-images/788 - Sigas Rural Municipality.jfif	jfif	2026-08-23 22:40:06.263648
+77	950	/destination-images/950 Taulihawa.jfif	jfif	2026-08-23 22:40:06.263648
+78	722	/destination-images/722 - Karnali Chisapani Bridge.jfif	jfif	2026-08-23 22:40:06.263648
+79	1723	/destination-images/1723.Bhardaha.jfif	jfif	2026-08-23 22:40:06.263648
+80	711	/destination-images/711 - Bedkot Lake.jfif	jfif	2026-08-23 22:40:06.263648
+81	712	/destination-images/712 - Brahmadev Temple.jfif	jfif	2026-08-23 22:40:06.263648
+82	772	/destination-images/772 - Saipal Base Camp.webp	webp	2026-08-23 22:40:06.263648
+83	743	/destination-images/743 - Achham Viewpoint.webp	webp	2026-08-23 22:40:06.263648
+84	746	/destination-images/746 - Chaurpati.jfif	jfif	2026-08-23 22:40:06.263648
+85	803	/destination-images/803 - Mohana River.jfif	jfif	2026-08-23 22:40:06.263648
+86	952	/destination-images/952 Piprahwa (Indian Side - accessible via Kapilvastu).jpg	jpg	2026-08-23 22:40:06.263648
+87	910	/destination-images/910 World Peace Pagoda (Lumbini).webp	webp	2026-08-23 22:40:06.263648
+88	789	/destination-images/789 - Shivnath Temple.jfif	jfif	2026-08-23 22:40:06.263648
+89	913	/destination-images/913 Bhairahawa (Siddharthanagar).jpg	jpg	2026-08-23 22:40:06.263648
+90	780	/destination-images/780 - Kolti.jfif	jfif	2026-08-23 22:40:06.263648
+91	956	/destination-images/956 Banganga River.jfif	jfif	2026-08-23 22:40:06.263648
+92	813	/destination-images/813 - Doti Durbar Area.jpg	jpg	2026-08-23 22:40:06.263648
+93	939	/destination-images/939 Omsatiya Village.webp	webp	2026-08-23 22:40:06.263648
+94	921	/destination-images/921 Sainamaina Archaeological Site.jpg	jpg	2026-08-23 22:40:06.263648
+95	774	/destination-images/774 - Bungal.jpg	jpg	2026-08-23 22:40:06.263648
+96	744	/destination-images/744 - Budhiganga River.webp	webp	2026-08-23 22:40:06.263648
+97	953	/destination-images/953 Binayi Tribeni.jpg	jpg	2026-08-23 22:40:06.263648
+98	936	/destination-images/936 Lumbini Research Institute.jfif	jfif	2026-08-23 22:40:06.263648
+99	909	/destination-images/909 Ashoka Pillar.jpg	jpg	2026-08-23 22:40:06.263648
+100	777	/destination-images/777 - Badimalika Meadow.jfif	jfif	2026-08-23 22:40:06.263648
+101	799	/destination-images/799 - Mahendranagar Museum.jfif	jfif	2026-08-23 22:40:06.263648
+102	771	/destination-images/771 - Talkot.jfif	jfif	2026-08-23 22:40:06.263648
+103	918	/destination-images/918 Hill Park (Butwal).jpg	jpg	2026-08-23 22:40:06.263648
+104	757	/destination-images/757 - Tripura Sundari Temple.jpg	jpg	2026-08-23 22:40:06.263648
+105	1722	/destination-images/1722 Fish farming centre.png	png	2026-08-23 22:40:06.263648
+106	798	/destination-images/798 - Bedkot Forest Trail.jfif	jfif	2026-08-23 22:40:06.263648
+107	797	/destination-images/797 - Ramaroshan View Tower.jfif	jfif	2026-08-23 22:40:06.263648
+108	942	/destination-images/942 Kanchan River Wetlands.jpg	jpg	2026-08-23 22:40:06.263648
+109	720	/destination-images/720 - Attariya.jfif	jfif	2026-08-23 22:40:06.263648
+110	716	/destination-images/716 - Dhangadhi Park.jfif	jfif	2026-08-23 22:40:06.263648
+111	928	/destination-images/928 Rohini River.jpg	jpg	2026-08-23 22:40:06.263648
+112	737	/destination-images/737 - Dipayal.jfif	jfif	2026-08-23 22:40:06.263648
+113	750	/destination-images/750 - Gokuleshwor.jfif	jfif	2026-08-23 22:40:06.263648
+114	944	/destination-images/944 Kudan (Nyigrodharama).jpg	jpg	2026-08-23 22:40:06.263648
+115	783	/destination-images/783 - Chameliya River.jfif	jfif	2026-08-23 22:40:06.263648
+116	747	/destination-images/747 - Api Nampa Conservation Area.jfif	jfif	2026-08-23 22:40:06.263648
+117	794	/destination-images/794 - Doti Palace Ruins.jpg	jpg	2026-08-23 22:40:06.263648
+118	764	/destination-images/764 - Badimalika Trek.jfif	jfif	2026-08-23 22:40:06.263648
+119	912	/destination-images/912 Gautam Buddha International Airport.webp	webp	2026-08-23 22:40:06.263648
+120	958	/destination-images/958 Kapilvastu-Dang Highway Corridor.jfif	jfif	2026-08-23 22:40:06.263648
+121	719	/destination-images/719 - Dhangadhi City.jfif	jfif	2026-08-23 22:40:06.263648
+122	758	/destination-images/758 - Patan Baitadi.jfif	jfif	2026-08-23 22:40:06.263648
+123	930	/destination-images/930 Chinese Buddhist Temple (Lumbini).jfif	jfif	2026-08-23 22:40:06.263648
+124	733	/destination-images/733 - Khaptad Baba Ashram.jfif	jfif	2026-08-23 22:40:06.263648
+125	710	/destination-images/710 - Mahakali River.jpg	jpg	2026-08-23 22:40:06.263648
+126	955	/destination-images/955 Chanauta.jfif	jfif	2026-08-23 22:40:06.263648
+127	741	/destination-images/741 - Ramaroshan Lake Cluster.JPG	jpg	2026-08-23 22:40:06.263648
+128	943	/destination-images/943 Tilaurakot.png	png	2026-08-23 22:40:06.263648
+129	759	/destination-images/759 - Dasharathchand Municipality.jfif	jfif	2026-08-23 22:40:06.263648
+130	911	/destination-images/911 Monastic Zone (Lumbini).jpg	jpg	2026-08-23 22:40:06.263648
+131	810	/destination-images/810 - Jogbuda River.jpg	jpg	2026-08-23 22:40:06.263648
+132	940	/destination-images/940 Siyari Village Corridor.jfif	jfif	2026-08-23 22:40:06.263648
+133	919	/destination-images/919 Tilottama Municipality Corridor.jpg	jpg	2026-08-23 22:40:06.263648
+134	708	/destination-images/708 - Shuklaphanta Grassland.jfif	jfif	2026-08-23 22:40:06.263648
+135	721	/destination-images/721 - Tikapur Park.jpg	jpg	2026-08-23 22:40:06.263648
+136	808	/destination-images/808 - Ajaymeru Rural Municipality.jpg	jpg	2026-08-23 22:40:06.263648
+137	715	/destination-images/715 - Ghodaghodi Bird Sanctuary.jpg	jpg	2026-08-23 22:40:06.263648
+138	753	/destination-images/753 - Byas Valley.jfif	jfif	2026-08-23 22:40:06.263648
+139	740	/destination-images/740 - Mangalsen.webp	webp	2026-08-23 22:40:06.263648
+140	793	/destination-images/793 - Jorayal Forest.jpeg	jpeg	2026-08-23 22:40:06.263648
+141	965	/destination-images/965 Kapilvastu Botanical Corridor.jpg	jpg	2026-08-23 22:40:06.263648
+142	812	/destination-images/812 - Badi Kedar Temple.jfif	jfif	2026-08-23 22:40:06.263648
+143	802	/destination-images/802 - Attariya Forest Park.jpg	jpg	2026-08-23 22:40:06.263648
+144	729	/destination-images/729 - Ugratara Temple.jfif	jfif	2026-08-23 22:40:06.263648
+145	756	/destination-images/756 - Mahakali River Viewpoint.jpg	jpg	2026-08-23 22:40:06.263648
+146	932	/destination-images/932 Myanmar Buddhist Temple (Lumbini).jfif	jfif	2026-08-23 22:40:06.263648
+147	920	/destination-images/920 devdha.jpg	jpg	2026-08-23 22:40:06.263648
+148	709	/destination-images/709 - Dodhara Chandani Suspension Bridge.jpg	jpg	2026-08-23 22:40:06.263648
+149	915	/destination-images/915 Rani Mahal (Palpa - accessible from Rupandehi).jpg	jpg	2026-08-23 22:40:06.263648
+150	930	/destination-images/930 Korean Buddhist Temple (Lumbini).jpg	jpg	2026-08-23 22:40:06.263648
+151	718	/destination-images/718 - Godavari Botanical Garden.jpg	jpg	2026-08-23 22:40:06.263648
+152	749	/destination-images/749 - Mount Api.jfif	jfif	2026-08-23 22:40:06.263648
+153	807	/destination-images/807 - Ugratara Bhagwati Temple.webp	webp	2026-08-23 22:40:06.263648
+154	923	/destination-images/923 Rupandehi-India Border (Sunauli).jpg	jpg	2026-08-23 22:40:06.263648
+155	778	/destination-images/778 - Triveni Bajura.jpg	jpg	2026-08-23 22:40:06.263648
+156	770	/destination-images/770 - Surma Sarovar.jpg	jpg	2026-08-23 22:40:06.263648
+157	745	/destination-images/745 - Safebagar.jfif	jfif	2026-08-23 22:40:06.263648
+158	738	/destination-images/738 - Seti River Gorge.jpg	jpg	2026-08-23 22:40:06.263648
+159	964	/destination-images/964 Pakadi Market Hub.jfif	jfif	2026-08-23 22:40:06.263648
+160	724	/destination-images/724 - Tikapur Great Garden.jfif	jfif	2026-08-23 22:40:06.263648
+161	909	/destination-images/909 Maya Devi Temple.webp	webp	2026-08-23 22:40:06.263648
+162	786	/destination-images/786 - Byas Rural Municipality.jpg	jpg	2026-08-23 22:40:06.263648
+163	809	/destination-images/809 - Parshuram Dham.jpg	jpg	2026-08-23 22:40:06.263648
+164	728	/destination-images/728 - Ajaymeru Fort.jfif	jfif	2026-08-23 22:40:06.263648
+165	763	/destination-images/763 - Badimalika Temple.jfif	jfif	2026-08-23 22:40:06.263648
+166	119	/destination-images/img119.jpg	jpg	2026-08-23 22:40:06.263648
+167	657	/destination-images/img657.jpg	jpg	2026-08-23 22:40:06.263648
+168	125	/destination-images/img125.jpg	jpg	2026-08-23 22:40:06.263648
+169	36	/destination-images/img36.jpg	jpg	2026-08-23 22:40:06.263648
+170	253	/destination-images/img253.jpg	jpg	2026-08-23 22:40:06.263648
+171	1314	/destination-images/img1314.jpg	jpg	2026-08-23 22:40:06.263648
+172	67	/destination-images/img67.webp	webp	2026-08-23 22:40:06.263648
+173	37	/destination-images/img37.jpg	jpg	2026-08-23 22:40:06.263648
+174	656	/destination-images/img656.jpg	jpg	2026-08-23 22:40:06.263648
+175	695	/destination-images/img695.jpg	jpg	2026-08-23 22:40:06.263648
+176	654	/destination-images/img654.jpg	jpg	2026-08-23 22:40:06.263648
+177	35	/destination-images/img35.jpg	jpg	2026-08-23 22:40:06.263648
+178	21	/destination-images/img21.jpg	jpg	2026-08-23 22:40:06.263648
+179	20	/destination-images/img20.jpg	jpg	2026-08-23 22:40:06.263648
+180	34	/destination-images/img34.jpg	jpg	2026-08-23 22:40:06.263648
+181	655	/destination-images/img655.jpg	jpg	2026-08-23 22:40:06.263648
+182	669	/destination-images/img669.jpg	jpg	2026-08-23 22:40:06.263648
+183	682	/destination-images/img682.jpg	jpg	2026-08-23 22:40:06.263648
+184	651	/destination-images/img651.jpg	jpg	2026-08-23 22:40:06.263648
+185	30	/destination-images/img30.jpg	jpg	2026-08-23 22:40:06.263648
+186	18	/destination-images/img18.jpg	jpg	2026-08-23 22:40:06.263648
+187	254	/destination-images/img254.jpg	jpg	2026-08-23 22:40:06.263648
+188	19	/destination-images/img19.jpg	jpg	2026-08-23 22:40:06.263648
+189	31	/destination-images/img31.jpg	jpg	2026-08-23 22:40:06.263648
+190	678	/destination-images/img678.jpg	jpg	2026-08-23 22:40:06.263648
+191	650	/destination-images/img650.jpg	jpg	2026-08-23 22:40:06.263648
+192	693	/destination-images/img693.jpg	jpg	2026-08-23 22:40:06.263648
+193	685	/destination-images/img685.jpg	jpg	2026-08-23 22:40:06.263648
+194	33	/destination-images/img33.jpg	jpg	2026-08-23 22:40:06.263648
+195	32	/destination-images/img32.jpg	jpg	2026-08-23 22:40:06.263648
+196	121	/destination-images/img121.jpg	jpg	2026-08-23 22:40:06.263648
+197	653	/destination-images/img653.jpg	jpg	2026-08-23 22:40:06.263648
+198	69	/destination-images/img69.jpg	jpg	2026-08-23 22:40:06.263648
+199	41	/destination-images/img41.jpg	jpg	2026-08-23 22:40:06.263648
+200	55	/destination-images/img55.jpg	jpg	2026-08-23 22:40:06.263648
+201	54	/destination-images/img54.jpg	jpg	2026-08-23 22:40:06.263648
+202	40	/destination-images/img40.jpg	jpg	2026-08-23 22:40:06.263648
+203	68	/destination-images/img68.jpg	jpg	2026-08-23 22:40:06.263648
+204	184	/destination-images/img184.jpg	jpg	2026-08-23 22:40:06.263648
+205	1217	/destination-images/img1217.jpg	jpg	2026-08-23 22:40:06.263648
+206	1229	/destination-images/img1229.jpg	jpg	2026-08-23 22:40:06.263648
+207	192	/destination-images/img192.jpg	jpg	2026-08-23 22:40:06.263648
+208	56	/destination-images/img56.jpg	jpg	2026-08-23 22:40:06.263648
+209	42	/destination-images/img42.jpg	jpg	2026-08-23 22:40:06.263648
+210	80	/destination-images/img80.jpg	jpg	2026-08-23 22:40:06.263648
+211	94	/destination-images/img94.jpg	jpg	2026-08-23 22:40:06.263648
+212	43	/destination-images/img43.jpg	jpg	2026-08-23 22:40:06.263648
+213	57	/destination-images/img57.jpg	jpg	2026-08-23 22:40:06.263648
+214	193	/destination-images/img193.jpg	jpg	2026-08-23 22:40:06.263648
+215	187	/destination-images/img187.jpg	jpg	2026-08-23 22:40:06.263648
+216	1228	/destination-images/img1228.jpg	jpg	2026-08-23 22:40:06.263648
+217	53	/destination-images/img53.jpg	jpg	2026-08-23 22:40:06.263648
+218	47	/destination-images/img47.jpg	jpg	2026-08-23 22:40:06.263648
+219	90	/destination-images/img90.jpg	jpg	2026-08-23 22:40:06.263648
+220	46	/destination-images/img46.jpg	jpg	2026-08-23 22:40:06.263648
+221	52	/destination-images/img52.jpg	jpg	2026-08-23 22:40:06.263648
+222	194	/destination-images/img194.jpg	jpg	2026-08-23 22:40:06.263648
+223	44	/destination-images/img44.jpg	jpg	2026-08-23 22:40:06.263648
+224	50	/destination-images/img50.jpg	jpg	2026-08-23 22:40:06.263648
+225	209	/destination-images/img209.jpg	jpg	2026-08-23 22:40:06.263648
+226	9	/destination-images/img9.jpg	jpg	2026-08-23 22:40:06.263648
+227	8	/destination-images/img8.jpg	jpg	2026-08-23 22:40:06.263648
+228	208	/destination-images/img208.jpg	jpg	2026-08-23 22:40:06.263648
+229	220	/destination-images/img220.jpg	jpg	2026-08-23 22:40:06.263648
+230	92	/destination-images/img92.jpg	jpg	2026-08-23 22:40:06.263648
+231	86	/destination-images/img86.jpg	jpg	2026-08-23 22:40:06.263648
+232	51	/destination-images/img51.jpg	jpg	2026-08-23 22:40:06.263648
+233	45	/destination-images/img45.jpg	jpg	2026-08-23 22:40:06.263648
+234	198	/destination-images/img198.jpg	jpg	2026-08-23 22:40:06.263648
+235	1223	/destination-images/img1223.jpg	jpg	2026-08-23 22:40:06.263648
+236	1237	/destination-images/img1237.jpg	jpg	2026-08-23 22:40:06.263648
+237	48	/destination-images/img48.jpg	jpg	2026-08-23 22:40:06.263648
+238	60	/destination-images/img60.jpg	jpg	2026-08-23 22:40:06.263648
+239	74	/destination-images/img74.jpg	jpg	2026-08-23 22:40:06.263648
+240	205	/destination-images/img205.jpg	jpg	2026-08-23 22:40:06.263648
+241	5	/destination-images/img5.jpg	jpg	2026-08-23 22:40:06.263648
+242	4	/destination-images/img4.png	png	2026-08-23 22:40:06.263648
+243	75	/destination-images/img75.jpg	jpg	2026-08-23 22:40:06.263648
+244	61	/destination-images/img61.jpg	jpg	2026-08-23 22:40:06.263648
+245	49	/destination-images/img49.jpg	jpg	2026-08-23 22:40:06.263648
+246	1236	/destination-images/img1236.jpg	jpg	2026-08-23 22:40:06.263648
+247	1222	/destination-images/img1222.jpg	jpg	2026-08-23 22:40:06.263648
+248	1220	/destination-images/img1220.jpg	jpg	2026-08-23 22:40:06.263648
+249	77	/destination-images/img77.jpg	jpg	2026-08-23 22:40:06.263648
+250	63	/destination-images/img63.jpg	jpg	2026-08-23 22:40:06.263648
+251	6	/destination-images/img6.jpg	jpg	2026-08-23 22:40:06.263648
+252	7	/destination-images/img7.jpg	jpg	2026-08-23 22:40:06.263648
+253	207	/destination-images/img207.jpg	jpg	2026-08-23 22:40:06.263648
+254	62	/destination-images/img62.jpg	jpg	2026-08-23 22:40:06.263648
+255	1221	/destination-images/img1221.jpg	jpg	2026-08-23 22:40:06.263648
+256	1219	/destination-images/img1219.jpg	jpg	2026-08-23 22:40:06.263648
+257	66	/destination-images/img66.jpg	jpg	2026-08-23 22:40:06.263648
+258	3	/destination-images/img3.jpg	jpg	2026-08-23 22:40:06.263648
+259	2	/destination-images/img2.jpg	jpg	2026-08-23 22:40:06.263648
+260	1218	/destination-images/img1218.jpg	jpg	2026-08-23 22:40:06.263648
+261	65	/destination-images/img65.jpg	jpg	2026-08-23 22:40:06.263648
+262	71	/destination-images/img71.jpg	jpg	2026-08-23 22:40:06.263648
+263	59	/destination-images/img59.jpg	jpg	2026-08-23 22:40:06.263648
+264	200	/destination-images/img200.jpg	jpg	2026-08-23 22:40:06.263648
+265	228	/destination-images/img228.jpg	jpg	2026-08-23 22:40:06.263648
+266	1	/destination-images/img1.jpg	jpg	2026-08-23 22:40:06.263648
+267	201	/destination-images/img201.jpg	jpg	2026-08-23 22:40:06.263648
+268	58	/destination-images/img58.jpg	jpg	2026-08-23 22:40:06.263648
+269	70	/destination-images/img70.jpg	jpg	2026-08-23 22:40:06.263648
+270	64	/destination-images/img64.jpg	jpg	2026-08-23 22:40:06.263648
+271	1227	/destination-images/img1227.jpg	jpg	2026-08-23 22:40:06.263648
+272	110	/destination-images/img110.jpg	jpg	2026-08-23 22:40:06.263648
+273	676	/destination-images/img676.jpg	jpg	2026-08-23 22:40:06.263648
+274	662	/destination-images/img662.jpg	jpg	2026-08-23 22:40:06.263648
+275	17	/destination-images/img17.jpg	jpg	2026-08-23 22:40:06.263648
+276	1309	/destination-images/img1309.jpg	jpg	2026-08-23 22:40:06.263648
+277	16	/destination-images/img16.jpg	jpg	2026-08-23 22:40:06.263648
+278	663	/destination-images/img663.jpg	jpg	2026-08-23 22:40:06.263648
+279	105	/destination-images/img105.jpg	jpg	2026-08-23 22:40:06.263648
+280	688	/destination-images/img688.jpg	jpg	2026-08-23 22:40:06.263648
+281	107	/destination-images/img107.jpg	jpg	2026-08-23 22:40:06.263648
+282	661	/destination-images/img661.jpg	jpg	2026-08-23 22:40:06.263648
+283	113	/destination-images/img113.jpg	jpg	2026-08-23 22:40:06.263648
+284	28	/destination-images/img28.jpg	jpg	2026-08-23 22:40:06.263648
+285	14	/destination-images/img14.jpg	jpg	2026-08-23 22:40:06.263648
+286	15	/destination-images/img15.jpg	jpg	2026-08-23 22:40:06.263648
+287	674	/destination-images/img674.jpg	jpg	2026-08-23 22:40:06.263648
+288	106	/destination-images/img106.jpg	jpg	2026-08-23 22:40:06.263648
+289	660	/destination-images/img660.jpg	jpg	2026-08-23 22:40:06.263648
+290	664	/destination-images/img664.jpg	jpg	2026-08-23 22:40:06.263648
+291	658	/destination-images/img658.jpg	jpg	2026-08-23 22:40:06.263648
+292	11	/destination-images/img11.jpg	jpg	2026-08-23 22:40:06.263648
+293	39	/destination-images/img39.jpg	jpg	2026-08-23 22:40:06.263648
+294	38	/destination-images/img38.jpg	jpg	2026-08-23 22:40:06.263648
+295	10	/destination-images/img10.jpg	jpg	2026-08-23 22:40:06.263648
+296	671	/destination-images/img671.jpg	jpg	2026-08-23 22:40:06.263648
+297	665	/destination-images/img665.jpg	jpg	2026-08-23 22:40:06.263648
+298	103	/destination-images/img103.jpg	jpg	2026-08-23 22:40:06.263648
+299	698	/destination-images/img698.jpg	jpg	2026-08-23 22:40:06.263648
+300	673	/destination-images/img673.jpg	jpg	2026-08-23 22:40:06.263648
+301	667	/destination-images/img667.jpg	jpg	2026-08-23 22:40:06.263648
+302	12	/destination-images/img12.jpg	jpg	2026-08-23 22:40:06.263648
+303	707	/destination-images/img707.jpg	jpg	2026-08-23 22:40:06.263648
+304	13	/destination-images/img13.jpg	jpg	2026-08-23 22:40:06.263648
+305	666	/destination-images/img666.jpg	jpg	2026-08-23 22:40:06.263648
+306	114	/destination-images/img114.jpg	jpg	2026-08-23 22:40:06.263648
 \.
 
 
@@ -9730,6 +10038,8 @@ COPY public.images (image_id, destination_id, image_url, image_type, uploaded_at
 --
 
 COPY public.reviews (review_id, user_id, destination_id, review_text, rating_value, review_date) FROM stdin;
+1	1	1	sahi ho	1	2026-08-23 21:17:32.756249
+2	1	1	sahi ho	1	2026-08-23 21:27:06.241059
 \.
 
 
@@ -9760,6 +10070,8 @@ COPY public.users (user_id, full_name, email, password_hash, profile_image, phon
 4	Test User	test@tripai.com	$2b$12$rgSOZbJ1sOMxtsDUzfeiDe5nTZO2b0hdZdlcOFEQDxtEhI4FgG7cu	\N	\N	user	2026-08-16 16:23:56.486397
 5	Kshitiz Upadhyyaa	coolkshitiz@gmail.com	$2b$12$5b5zI0u4lPr2Qa0KRQhVtuGeYmtGWFGpG9tjB1hMNaQCJ.LkoQCfC	\N	\N	user	2026-08-17 15:08:46.791277
 3	prajwal subedi	prajwalsubedi7b@gmail.com	$2b$12$yKLiRo0.75.Lqhvrt7e/3OxM7V5Wesyx31.NSQ35gFhre8Ahi57ei	\N	\N	owner	2026-08-16 13:39:06.664682
+6	prajwal subedi	prajwolsubedi145@gmail.com	$2b$12$c2nu2j2sCm3gPVLQzC71tORUHufb2UkGYCadxz0RwhTj8mhkN/kSG	\N	\N	user	2026-08-20 13:27:54.65183
+7	Kshitiz 	coolxitiz2020@gmail.com	$2b$12$dqM4RGYiCmdx3TM92SGTWuLzB5ZAevN8j7lELm27D0qebFO9psYQm	\N	\N	user	2026-08-22 21:07:52.322235
 \.
 
 
@@ -9774,7 +10086,7 @@ SELECT pg_catalog.setval('public.activities_activity_id_seq', 119, true);
 -- Name: bookings_booking_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.bookings_booking_id_seq', 6, true);
+SELECT pg_catalog.setval('public.bookings_booking_id_seq', 7, true);
 
 
 --
@@ -9816,14 +10128,14 @@ SELECT pg_catalog.setval('public.favorites_favorite_id_seq', 1, false);
 -- Name: images_image_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.images_image_id_seq', 1, false);
+SELECT pg_catalog.setval('public.images_image_id_seq', 306, true);
 
 
 --
 -- Name: reviews_review_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.reviews_review_id_seq', 1, false);
+SELECT pg_catalog.setval('public.reviews_review_id_seq', 2, true);
 
 
 --
@@ -9844,7 +10156,7 @@ SELECT pg_catalog.setval('public.sentiment_analysis_sentiment_id_seq', 1, false)
 -- Name: users_user_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres
 --
 
-SELECT pg_catalog.setval('public.users_user_id_seq', 5, true);
+SELECT pg_catalog.setval('public.users_user_id_seq', 7, true);
 
 
 --
@@ -10180,6 +10492,14 @@ ALTER TABLE ONLY public.favorites
 
 
 --
+-- Name: bookings fk_bookings_owner; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+--
+
+ALTER TABLE ONLY public.bookings
+    ADD CONSTRAINT fk_bookings_owner FOREIGN KEY (owner_id) REFERENCES public.users(user_id);
+
+
+--
 -- Name: homestays homestays_owner_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
@@ -10231,5 +10551,5 @@ ALTER TABLE ONLY public.sentiment_analysis
 -- PostgreSQL database dump complete
 --
 
-\unrestrict cAnH61QQ9lrPmkSoPxmPcBzYOIZrRdG0l8QnRcW7pHwHyb5g6Zi1qv8QHOoJ86o
+\unrestrict zgBOsyjOguXXiQAH7UKYqdyo6jjTbDyaaZ1z0jDkBbE1Htp1wizyq9xL5tKOCwh
 

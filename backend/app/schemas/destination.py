@@ -9,6 +9,40 @@ from app.schemas.activity import ActivityResponse
 # -----------------------------
 # Homepage Card
 # -----------------------------
+# class DestinationList(BaseModel):
+#     destination_id: int
+#     destination_name: str
+#     province: str
+#     district: str
+#     category: str | None = None
+#     travel_type: str | None = None
+#     estimated_budget_npr: int | None = None
+#     average_rating: Decimal | None = None
+#     popularity_score: Decimal | None = None
+
+#     class Config:
+#         from_attributes = True
+
+
+
+# # -----------------------------
+# # Destination List
+# # -----------------------------
+# class DestinationList(BaseModel):
+#     destination_id: int
+#     destination_name: str
+#     province: str
+#     district: str
+#     category: str | None = None
+#     travel_type: str | None = None
+#     estimated_budget_npr: int | None = None
+#     average_rating: Decimal | None = None
+#     popularity_score: Decimal | None = None
+
+#     class Config:
+#         from_attributes = True
+
+
 class DestinationList(BaseModel):
     destination_id: int
     destination_name: str
@@ -20,24 +54,9 @@ class DestinationList(BaseModel):
     average_rating: Decimal | None = None
     popularity_score: Decimal | None = None
 
-    class Config:
-        from_attributes = True
-
-
-
-# -----------------------------
-# Destination List
-# -----------------------------
-class DestinationList(BaseModel):
-    destination_id: int
-    destination_name: str
-    province: str
-    district: str
-    category: str | None = None
-    travel_type: str | None = None
-    estimated_budget_npr: int | None = None
-    average_rating: Decimal | None = None
-    popularity_score: Decimal | None = None
+    images: list[ImageResponse] = Field(
+        default_factory=list
+    )
 
     class Config:
         from_attributes = True

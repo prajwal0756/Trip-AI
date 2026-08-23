@@ -13,9 +13,9 @@ import Sidebar from '../components/layout/Sidebar'
 
 const links = [
   { to: '/dashboard', label: 'Dashboard', icon: FaHome, end: true },
-  { to: '/recommendations', label: 'AI Recommendation', icon: FaMagic },
-  { to: '/destinations', label: 'Destinations', icon: FaMapMarkedAlt },
-  { to: '/homestays', label: 'Homestays', icon: FaBed },
+  // { to: '/recommendations', label: 'AI Recommendation', icon: FaMagic },
+  // { to: '/destinations', label: 'Destinations', icon: FaMapMarkedAlt },
+  // { to: '/homestays', label: 'Homestays', icon: FaBed },
   { to: '/bookings', label: 'Bookings', icon: FaCalendarCheck },
   { to: '/favorites', label: 'Favorites', icon: FaHeart },
   { to: '/reviews', label: 'Reviews', icon: FaStar },

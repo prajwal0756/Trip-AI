@@ -23,6 +23,13 @@ export default function AIAssistant() {
       handleSubmit({ preventDefault: () => {} }, initialQuery)
     }
   }, [])
+
+  const handlePromptKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
+      e.currentTarget.form?.requestSubmit()
+    }
+  }
   const [loading, setLoading] = useState(false)
   const [results, setResults] = useState([])
   const [aiResponse, setAiResponse] = useState(null)
@@ -170,6 +177,7 @@ export default function AIAssistant() {
                   <textarea
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handlePromptKeyDown}
                     disabled={loading}
                     rows={7}
                     placeholder="Describe your ideal trip in your own words..."
@@ -297,6 +305,7 @@ export default function AIAssistant() {
               <textarea
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handlePromptKeyDown}
                 disabled={loading}
                 rows={4}
                 placeholder="Describe your ideal trip in your own words..."

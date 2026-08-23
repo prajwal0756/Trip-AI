@@ -49,7 +49,14 @@ export default function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/destinations" element={<Destinations />} />
-              <Route path="/ai-assistant" element={<AIAssistant />} />
+              <Route
+                path="/ai-assistant"
+                element={
+                  <ProtectedRoute role="traveler">
+                    <AIAssistant />
+                  </ProtectedRoute>
+                }
+              />
               <Route path="/recommendations" element={<RecommendationForm />} />
               <Route path="/destination/:id" element={<DestinationDetails />} />
               <Route path="/homestays" element={<Homestays />} />

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { FaEnvelope, FaLock } from 'react-icons/fa'
 import Button from '../../components/shared/Button'
 import { useAuth } from '../../context/AuthContext'
@@ -9,6 +9,7 @@ export default function Login() {
   const { login } = useAuth()
   const { pushToast } = useApp()
   const navigate = useNavigate()
+  const location = useLocation()
   const [form, setForm] = useState({ email: '', password: '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -29,9 +30,18 @@ export default function Login() {
       return
     }
 
-    pushToast(`Welcome back, ${result.user.full_name.split(' ')[0]}!`)
+    pushToast(`Welcome back, ${result.user.fullName.split(' ')[0]}!`)
 
-    navigate(result.user.role === 'owner' ? '/owner' : '/dashboard')
+    const from = location.state?.from?.pathname
+
+    navigate(
+      from && from.startsWith('/')
+        ? from
+        : result.user.role === 'owner'
+          ? '/owner'
+          : '/dashboard',
+      { replace: true }
+    )
   }
 
   const fillDemo = (role) => {

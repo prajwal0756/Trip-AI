@@ -11,3 +11,4 @@ from app.models.destination_mapping import (
     DestinationActivity,
 )
 from app.models.homestay import Homestay
+from app.models.review import Review

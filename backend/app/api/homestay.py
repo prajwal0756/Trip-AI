@@ -44,6 +44,7 @@ def search(
 def get_homestays(
     district: str | None = Query(default=None),
     province: str | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
@@ -69,6 +70,7 @@ def get_homestays(
             Homestay.rating.desc().nullslast(),
             Homestay.review_count.desc().nullslast(),
         )
+        .offset((page - 1) * limit)
         .limit(limit)
         .all()
     )

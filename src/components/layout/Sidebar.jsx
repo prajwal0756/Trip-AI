@@ -30,7 +30,9 @@ export default function Sidebar({ links, title = 'Dashboard' }) {
 
       {user && (
         <div className="mx-4 mb-4 flex items-center gap-3 rounded-xl bg-sand-100/50 dark:bg-sand-100/5 p-3">
-          <img src={user.avatar} alt={user.fullName} className="h-9 w-9 rounded-full object-cover" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-teal-900 text-sm font-semibold text-white">
+            {user.fullName?.charAt(0).toUpperCase() || 'U'}
+          </div>
           <div className="min-w-0">
             <p className="truncate text-sm font-medium text-ink-900 dark:text-sand-100">{user.fullName}</p>
             <p className="truncate text-xs capitalize text-ink-700/70 dark:text-sand-100/50">{user.role}</p>

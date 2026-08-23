@@ -29,6 +29,7 @@ export default function DestinationCard({ destination }) {
   const image =
     destination?.image ||
     destination?.image_url ||
+    destination?.images?.[0]?.image_url ||
     null
 
   return (
