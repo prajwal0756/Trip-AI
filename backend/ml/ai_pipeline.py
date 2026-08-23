@@ -1,4 +1,8 @@
 from typing import Dict, Any
+from sqlalchemy.orm import Session
+
+from app.core.database import SessionLocal
+from app.models.destination import Destination
 from pathlib import Path
 import pandas as pd
 from ml.intent.intent_service import IntentService
@@ -269,6 +273,62 @@ class AIPipeline:
             nlp_result=nlp_result,
             top_n=10
         )
+
+        # ----------------------------------------------
+        # Attach destination images from PostgreSQL
+        # ----------------------------------------------
+
+        db = SessionLocal()
+
+        try:
+            image_map = {}
+
+            destination_ids = (
+                results["destination_id"]
+                .dropna()
+                .astype(int)
+                .tolist()
+                if "destination_id" in results.columns
+                else []
+            )
+
+            if destination_ids:
+
+                destinations = (
+                    db.query(Destination)
+                    .filter(
+                        Destination.destination_id.in_(
+                            destination_ids
+                        )
+                    )
+                    .all()
+                )
+
+                for destination in destinations:
+
+                    image_url = None
+
+                    if destination.images:
+                        image_url = (
+                            destination.images[0].image_url
+                        )
+
+                    image_map[
+                        destination.destination_id
+                    ] = image_url
+
+            if image_map:
+
+                results = results.copy()
+
+                results["image_url"] = (
+                    results["destination_id"]
+                    .astype(int)
+                    .map(image_map)
+                )
+
+        finally:
+            db.close()
 
         return {
             "query": query,

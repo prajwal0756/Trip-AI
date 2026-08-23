@@ -607,29 +607,66 @@ function TopRecommendation({ destination, nlp }) {
 
         {/* Visual */}
 
-        <div className="flex min-h-[270px] items-center justify-center bg-gradient-to-br from-[#183344] via-[#102432] to-[#0B1117] p-8">
+        <div className="relative min-h-[270px] overflow-hidden bg-[#102D3B]">
 
-          <div className="text-center">
+          {destination.image_url ? (
+            <img
+              src={destination.image_url}
+              alt={name}
+              loading="lazy"
+              onError={(e) => {
+                e.currentTarget.onerror = null
+                e.currentTarget.style.display = 'none'
+              }}
+              className="h-full min-h-[270px] w-full object-cover"
+            />
+          ) : (
+            <div className="flex min-h-[270px] items-center justify-center bg-gradient-to-br from-[#183344] via-[#102432] to-[#0B1117] p-8">
 
-            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-terracotta-400">
-              <FaMapMarkerAlt size={24} />
+              <div className="text-center">
+
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 text-terracotta-400">
+                  <FaMapMarkerAlt size={24} />
+                </div>
+
+                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-terracotta-400">
+                  Top AI match
+                </p>
+
+                <h3 className="mt-2 font-display text-3xl font-semibold text-white">
+                  {name}
+                </h3>
+
+                <p className="mt-2 text-sm text-slate-300">
+                  {district}
+                  {district && province ? ', ' : ''}
+                  {province}
+                </p>
+
+              </div>
+
             </div>
+          )}
 
-            <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-terracotta-400">
-              Top AI match
-            </p>
+          {/* Image overlay */}
 
-            <h3 className="mt-2 font-display text-3xl font-semibold text-white">
-              {name}
-            </h3>
+          {destination.image_url && (
+            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
+          )}
 
-            <p className="mt-2 text-sm text-slate-300">
-              {district}
-              {district && province ? ', ' : ''}
-              {province}
-            </p>
+          {/* Label */}
 
-          </div>
+          {destination.image_url && (
+            <div className="absolute bottom-5 left-5">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-terracotta-300">
+                Top AI match
+              </p>
+
+              <h3 className="mt-1 font-display text-2xl font-semibold text-white drop-shadow-md">
+                {name}
+              </h3>
+            </div>
+          )}
 
         </div>
 
@@ -803,29 +840,52 @@ function AIDestinationCard({ destination, nlp }) {
 
       {/* Placeholder visual */}
 
-      <div className="relative flex h-40 items-center justify-center overflow-hidden bg-gradient-to-br from-[#183344] via-[#102432] to-[#0B1117]">
+      {/* Destination image */}
 
-        <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-teal-500/20 blur-3xl" />
+      <div className="relative h-40 overflow-hidden bg-[#102D3B]">
 
-        <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-terracotta-500/20 blur-3xl" />
+        {destination.image_url ? (
+          <img
+            src={destination.image_url}
+            alt={name}
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.onerror = null
+              e.currentTarget.style.display = 'none'
+            }}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.025]"
+          />
+        ) : (
+          <div className="relative flex h-full items-center justify-center bg-gradient-to-br from-[#183344] via-[#102432] to-[#0B1117]">
 
-        <div className="relative text-center">
+            <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-teal-500/20 blur-3xl" />
 
-          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-terracotta-400">
-            <FaMapMarkerAlt />
+            <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-terracotta-500/20 blur-3xl" />
+
+            <div className="relative text-center">
+
+              <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-terracotta-400">
+                <FaMapMarkerAlt />
+              </div>
+
+              <h3 className="mt-3 font-display text-xl font-semibold text-white">
+                {name}
+              </h3>
+
+              <p className="mt-1 text-sm text-slate-300">
+                {district}
+                {district && province ? ', ' : ''}
+                {province}
+              </p>
+
+            </div>
+
           </div>
+        )}
 
-          <h3 className="mt-3 font-display text-xl font-semibold text-white">
-            {name}
-          </h3>
-
-          <p className="mt-1 text-sm text-slate-300">
-            {district}
-            {district && province ? ', ' : ''}
-            {province}
-          </p>
-
-        </div>
+        {destination.image_url && (
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
+        )}
 
       </div>
 

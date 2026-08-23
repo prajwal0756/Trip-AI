@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+
 import {
   FaMapMarkerAlt,
   FaWallet,
@@ -8,7 +9,9 @@ import {
   FaMagic,
 } from 'react-icons/fa'
 
-export default function RecommendationCard({ recommendation }) {
+export default function RecommendationCard({
+  recommendation,
+}) {
   const {
     destination_id,
     destination_name,
@@ -16,105 +19,168 @@ export default function RecommendationCard({ recommendation }) {
     district,
     best_season,
     estimated_budget_npr,
+    average_duration_days,
     average_rating,
     description,
     similarity_score,
+    image_url,
   } = recommendation
 
   const rating = Number(average_rating || 0)
   const similarity = Number(similarity_score || 0)
 
+  const imageSrc = image_url
+    ? image_url.startsWith('http')
+      ? image_url
+      : `http://127.0.0.1:8000${image_url}`
+    : null
+
   return (
-    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#111B28] shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-teal-500/40 hover:shadow-xl">
+    <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-[#E5E1D8] bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
 
-      {/* Destination visual header */}
-      <div className="relative flex h-44 items-center justify-center overflow-hidden bg-gradient-to-br from-[#183344] via-[#102432] to-[#0B1117]">
+      {/* =====================================================
+          IMAGE
+      ===================================================== */}
 
-        {/* Decorative background */}
-        <div className="absolute inset-0 opacity-40">
-          <div className="absolute -left-10 -top-10 h-32 w-32 rounded-full bg-teal-500/20 blur-2xl" />
-          <div className="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-terracotta-500/20 blur-2xl" />
-        </div>
+      <div className="relative h-48 overflow-hidden bg-[#173542]">
 
-        <div className="relative px-6 text-center">
-          <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-terracotta-400">
-            <FaMapMarkerAlt size={18} />
+        {imageSrc ? (
+          <img
+            src={imageSrc}
+            alt={destination_name}
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            onError={(event) => {
+              event.currentTarget.style.display = 'none'
+            }}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#173D4A] to-[#10242F]">
+            <FaMapMarkerAlt
+              size={32}
+              className="text-terracotta-400"
+            />
           </div>
+        )}
 
-          <h3 className="font-display text-xl font-semibold text-white">
-            {destination_name}
-          </h3>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/5" />
 
-          <p className="mt-1 text-sm text-slate-400">
-            {district}, {province}
-          </p>
+        {/* Rating */}
+
+        <div className="absolute right-4 top-4 flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-[#253330] shadow-sm">
+          <FaStar
+            size={11}
+            className="text-amber-500"
+          />
+          {rating.toFixed(1)}
         </div>
+
+        {/* Location */}
+
+        <div className="absolute bottom-4 left-4 flex items-center gap-1.5 text-xs font-medium text-white">
+          <FaMapMarkerAlt
+            size={11}
+            className="text-terracotta-300"
+          />
+
+          {district}, {province}
+        </div>
+
       </div>
 
-      {/* Card content */}
+      {/* =====================================================
+          CONTENT
+      ===================================================== */}
+
       <div className="flex flex-1 flex-col p-5">
 
-        {/* Name + rating */}
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h3 className="font-display text-lg font-semibold text-white">
-              {destination_name}
-            </h3>
+        <h3 className="font-display text-xl font-semibold leading-tight text-[#172725]">
+          {destination_name}
+        </h3>
 
-            <div className="mt-1 flex items-center gap-1.5 text-sm text-slate-400">
-              <FaMapMarkerAlt size={11} className="text-terracotta-400" />
-              <span>
-                {district}, {province}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex shrink-0 items-center gap-1 text-sm font-semibold text-white">
-            <FaStar className="text-terracotta-400" size={13} />
-            {rating.toFixed(1)}
-          </div>
-        </div>
-
-        {/* Basic information */}
-        <div className="mt-4 flex flex-wrap gap-2">
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-slate-300">
-            <FaWallet size={10} className="text-teal-400" />
-            NPR {Number(estimated_budget_npr || 0).toLocaleString()}
-          </span>
-
-          <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/5 px-2.5 py-1.5 text-xs text-slate-300">
-            <FaCalendarAlt size={10} className="text-teal-400" />
-            {best_season || 'Year-round'}
-          </span>
-        </div>
-
-        {/* Description */}
-        <p className="mt-4 line-clamp-2 text-sm leading-6 text-slate-400">
-          {description || 'A destination selected based on your travel preferences.'}
+        <p className="mt-2 line-clamp-2 text-sm leading-6 text-[#6B7672]">
+          {description ||
+            'A destination selected based on your travel preferences.'}
         </p>
 
-        {/* AI match */}
-        <div className="mt-4 flex items-center gap-2 text-xs text-teal-300">
-          <FaMagic size={11} />
-          <span>
-            {similarity > 0
-              ? `${(similarity * 100).toFixed(1)}% preference match`
-              : 'Recommended for your preferences'}
+        {/* =================================================
+            INFO
+        ================================================= */}
+
+        <div className="mt-4 flex flex-wrap gap-2">
+
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F4F0E8] px-3 py-1.5 text-xs font-medium text-[#56615E]">
+            <FaWallet
+              size={10}
+              className="text-teal-700"
+            />
+
+            NPR{' '}
+            {Number(
+              estimated_budget_npr || 0
+            ).toLocaleString()}
           </span>
+
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F4F0E8] px-3 py-1.5 text-xs font-medium text-[#56615E]">
+            <FaCalendarAlt
+              size={10}
+              className="text-teal-700"
+            />
+
+            {average_duration_days || 1}{' '}
+            {Number(average_duration_days) === 1
+              ? 'day'
+              : 'days'}
+          </span>
+
+          <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#F4F0E8] px-3 py-1.5 text-xs font-medium text-[#56615E]">
+            <FaCalendarAlt
+              size={10}
+              className="text-teal-700"
+            />
+
+            {best_season || 'Year-round'}
+          </span>
+
         </div>
 
-        {/* Action */}
+        {/* =================================================
+            MATCH
+        ================================================= */}
+
+        <div className="mt-4 flex items-center gap-2">
+
+          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-teal-50 text-teal-700">
+            <FaMagic size={11} />
+          </span>
+
+          <span className="text-xs font-medium text-teal-700">
+            {similarity > 0
+              ? `${(
+                  similarity * 100
+                ).toFixed(1)}% preference match`
+              : 'Recommended for you'}
+          </span>
+
+        </div>
+
+        {/* =================================================
+            ACTION
+        ================================================= */}
+
         <Link
           to={`/destination/${destination_id}`}
-          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-terracotta-500 px-4 py-2.5 text-sm font-semibold text-white transition-all duration-200 hover:bg-terracotta-600 group-hover:shadow-md"
+          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-terracotta-500 px-4 py-3 text-sm font-semibold text-white transition hover:bg-terracotta-600"
         >
           Explore destination
+
           <FaArrowRight
             size={11}
             className="transition-transform duration-200 group-hover:translate-x-1"
           />
         </Link>
+
       </div>
+
     </article>
   )
 }

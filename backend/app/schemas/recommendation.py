@@ -58,6 +58,8 @@ class RecommendationResponse(BaseModel):
 
     description: str
 
+    image_url: str | None = None
+
     similarity_score: float
 
     final_score: float
