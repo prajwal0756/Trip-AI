@@ -27,17 +27,6 @@ export const reviews = [
   {
     id: 'r3',
     targetType: 'homestay',
-    targetId: 'h3',
-    travelerId: 'u_traveler1',
-    travelerName: 'Aarav Koirala',
-    avatar: 'https://i.pravatar.cc/150?img=12',
-    rating: 5,
-    comment: 'Felt like stepping back in time. The wooden carvings and courtyard breakfast were unforgettable.',
-    date: '2026-02-06',
-  },
-  {
-    id: 'r4',
-    targetType: 'homestay',
     targetId: 'h7',
     travelerId: 'u_traveler3',
     travelerName: 'Bibek Thapa',
@@ -47,7 +36,7 @@ export const reviews = [
     date: '2025-12-22',
   },
   {
-    id: 'r5',
+    id: 'r4',
     targetType: 'destination',
     targetId: 'd1',
     travelerId: 'u_traveler2',
@@ -58,7 +47,7 @@ export const reviews = [
     date: '2025-10-30',
   },
   {
-    id: 'r6',
+    id: 'r5',
     targetType: 'destination',
     targetId: 'd6',
     travelerId: 'u_traveler1',

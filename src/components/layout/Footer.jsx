@@ -47,7 +47,7 @@ export default function Footer() {
         </div>
 
         <div className="mt-10 border-t border-white/10 pt-6 text-center text-xs text-sand-100/50">
-          © {new Date().getFullYear()} TripAI. Built as a final-year engineering project.
+          © {new Date().getFullYear()}  TripAI. All rights reserved.
         </div>
       </div>
     </footer>

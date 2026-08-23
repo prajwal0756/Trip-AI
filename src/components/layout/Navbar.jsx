@@ -1,14 +1,15 @@
 import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
-import { FaBars, FaTimes, FaUserCircle, FaSun, FaMoon } from 'react-icons/fa'
+
+import { FaBars, FaTimes, FaUserCircle } from 'react-icons/fa'
 import { useAuth } from '../../context/AuthContext'
-import { useApp } from '../../context/AppContext'
+
 import Button from '../shared/Button'
 
 const navLinks = [
   { to: '/', label: 'Home' },
   { to: '/destinations', label: 'Destinations' },
-  { to: '/ai-assistant', label: 'TripAI Assistant ✨' },
+  { to: '/ai-assistant', label: 'TripAI Assistant ' },
   { to: '/recommendations', label: 'Explore by Preferences' },
   { to: '/homestays', label: 'Homestays' },
   { to: '/about', label: 'About' },
@@ -18,7 +19,7 @@ const navLinks = [
 export default function Navbar() {
   const [open, setOpen] = useState(false)
   const { user, logout } = useAuth()
-  const { darkMode, toggleDarkMode } = useApp()
+
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -55,15 +56,7 @@ export default function Navbar() {
 
         <div className="hidden items-center gap-3 lg:flex">
           {/* Dark / Light Mode Toggle Button */}
-          <button
-            onClick={toggleDarkMode}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-ink-900/10 dark:border-white/20 bg-white/60 dark:bg-navy-900/60 text-ink-700 dark:text-amber-300 hover:bg-white dark:hover:bg-navy-800 transition-colors shadow-sm"
-            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {darkMode ? <FaSun size={15} /> : <FaMoon size={14} />}
-          </button>
-
+          
           {user ? (
             <>
               <Link to={dashboardPath} className="flex items-center gap-2 text-sm font-medium text-ink-700 dark:text-slate-200 hover:text-teal-900 dark:hover:text-white">
@@ -87,13 +80,7 @@ export default function Navbar() {
 
         <div className="flex items-center gap-2 lg:hidden">
           {/* Mobile Dark Mode Toggle Button */}
-          <button
-            onClick={toggleDarkMode}
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-ink-900/10 dark:border-white/20 bg-white/60 dark:bg-navy-900/60 text-ink-700 dark:text-amber-300 hover:bg-white dark:hover:bg-navy-800 transition-colors"
-            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {darkMode ? <FaSun size={15} /> : <FaMoon size={14} />}
-          </button>
+         
 
           <button
             className="text-ink-900 dark:text-white"

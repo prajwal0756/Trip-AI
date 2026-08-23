@@ -50,6 +50,7 @@ export default function App() {
               <Route path="/register" element={<Register />} />
               <Route path="/destinations" element={<Destinations />} />
               <Route path="/ai-assistant" element={<AIAssistant />} />
+              <Route path="/recommendations" element={<RecommendationForm />} />
               <Route path="/destination/:id" element={<DestinationDetails />} />
               <Route path="/homestays" element={<Homestays />} />
             </Route>
@@ -63,7 +64,7 @@ export default function App() {
               }
             >
               <Route path="/dashboard" element={<TravelerDashboard />} />
-              <Route path="/recommendations" element={<RecommendationForm />} />
+              {/* <Route path="/recommendations" element={<RecommendationForm />} /> */}
               <Route path="/ai-assistant" element={<TripAIAssistant />} />
               <Route path="/bookings" element={<Bookings />} />
               <Route path="/favorites" element={<Favorites />} />

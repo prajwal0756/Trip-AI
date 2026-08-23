@@ -41,85 +41,98 @@ export default function Destinations() {
   // ---------------------------------------------
 
   useEffect(() => {
-  const fetchDestinations = async () => {
-    try {
-      setLoading(true)
-      setError('')
+    const fetchDestinations = async () => {
+      const trimmedQuery = query.trim()
 
-      let response
-
-      if (query.trim()) {
-        response = await api.get('/destinations/search', {
-          params: {
-            q: query.trim(),
-          },
-        })
-      } else if (travelType !== 'All' || region !== 'All') {
-        response = await api.get('/destinations/filter', {
-          params: {
-            province: region !== 'All' ? region : undefined,
-            travel_type:
-              travelType !== 'All' ? travelType : undefined,
-          },
-        })
-      } else {
-        response = await api.get('/destinations/', {
-          params: {
-            page,
-            limit: PAGE_SIZE,
-          },
-        })
+      // Don't search for incomplete one-character queries
+      if (trimmedQuery.length === 1) {
+        setError('')
+        setLoading(false)
+        return
       }
 
-      const mappedDestinations = response.data.map((destination) => ({
-        id: String(destination.destination_id),
-        name: destination.destination_name,
-        region: destination.province,
-        rating: Number(destination.average_rating || 0),
-        reviewCount: destination.review_count || 0,
-        description: destination.description || '',
-        image: null,
+      try {
+        setLoading(true)
+        setError('')
 
-        travelType: destination.travel_type
-          ? destination.travel_type
-              .split(',')
-              .map((item) => item.trim())
-              .filter(Boolean)
-          : [],
+        let response
 
-        estimatedBudget:
-          destination.estimated_budget_npr || 0,
-      }))
+        if (trimmedQuery.length >= 2) {
+          response = await api.get('/destinations/search', {
+            params: {
+              q: trimmedQuery,
+            },
+          })
+        } else if (travelType !== 'All' || region !== 'All') {
+          response = await api.get('/destinations/filter', {
+            params: {
+              province:
+                region !== 'All' ? region : undefined,
+              travel_type:
+                travelType !== 'All' ? travelType : undefined,
+            },
+          })
+        } else {
+          response = await api.get('/destinations/', {
+            params: {
+              page,
+              limit: PAGE_SIZE,
+            },
+          })
+        }
 
-      setDestinations(mappedDestinations)
+        const mappedDestinations = response.data.map((destination) => ({
+          id: String(destination.destination_id),
+          name: destination.destination_name,
+          region: destination.province,
+          rating: Number(destination.average_rating || 0),
+          reviewCount: destination.review_count || 0,
+          description: destination.description || '',
+          image: null,
 
-    const usingServerPagination =
-      !query.trim() &&
-      travelType === 'All' &&
-      region === 'All'
+          travelType: destination.travel_type
+            ? destination.travel_type
+                .split(',')
+                .map((item) => item.trim())
+                .filter(Boolean)
+            : [],
 
-  if (usingServerPagination) {
-    const statisticsResponse = await api.get(
-      '/destinations/statistics'
-    )
+          estimatedBudget:
+            destination.estimated_budget_npr || 0,
+        }))
 
-    setTotalDestinations(
-      statisticsResponse.data.total_destinations || 0
-    )
-  } else {
-    setTotalDestinations(mappedDestinations.length)
-  }
+        setDestinations(mappedDestinations)
 
-    } catch (err) {
-      console.error('Failed to load destinations:', err)
-      setError('Unable to load destinations.')
-    } finally {
-      setLoading(false)
+        const usingServerPagination =
+          !trimmedQuery &&
+          travelType === 'All' &&
+          region === 'All'
+
+        if (usingServerPagination) {
+          const statisticsResponse = await api.get(
+            '/destinations/statistics'
+          )
+
+          setTotalDestinations(
+            statisticsResponse.data.total_destinations || 0
+          )
+        } else {
+          setTotalDestinations(mappedDestinations.length)
+        }
+      } catch (err) {
+        console.error('Failed to load destinations:', err)
+        setError('Unable to load destinations.')
+      } finally {
+        setLoading(false)
+      }
     }
-  }
 
-  fetchDestinations()
-}, [page, query, travelType, region])
+    const timer = setTimeout(() => {
+      fetchDestinations()
+    }, 350)
+
+    return () => clearTimeout(timer)
+  }, [page, query, travelType, region])
 
 
   // ---------------------------------------------

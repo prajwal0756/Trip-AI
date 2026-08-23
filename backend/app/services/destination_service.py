@@ -107,27 +107,32 @@ def search_destinations(
     # 2 = other search matches
     # -------------------------------------------------
 
-    relevance_order = case(
-        (
-            func.lower(
-                Destination.destination_name
-            ) == search_text.lower(),
-            0,
-        ),
-        (
-            target_district is not None,
-            case(
-                (
-                    func.lower(
-                        Destination.district
-                    ) == target_district.lower(),
-                    1,
-                ),
-                else_=2,
+    if target_district:
+        relevance_order = case(
+            (
+                func.lower(
+                    Destination.destination_name
+                ) == search_text.lower(),
+                0,
             ),
-        ),
-        else_=2,
-    )
+            (
+                func.lower(
+                    Destination.district
+                ) == target_district.lower(),
+                1,
+            ),
+            else_=2,
+        )
+    else:
+        relevance_order = case(
+            (
+                func.lower(
+                    Destination.destination_name
+                ) == search_text.lower(),
+                0,
+            ),
+            else_=2,
+        )
 
     return (
         db.query(Destination)

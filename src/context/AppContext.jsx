@@ -11,13 +11,11 @@ let toastId = 0
 
 export function AppProvider({ children }) {
     const { user, loading: authLoading } = useAuth()
-  const [darkMode, setDarkMode] = useState(() => {
+    const [darkMode, setDarkMode] = useState(() => {
     const saved = localStorage.getItem('tripai_theme')
     if (saved) return saved === 'dark'
-    return window.matchMedia('(prefers-color-scheme: dark)').matches
+    return false
   })
-
-
 
   useEffect(() => {
     if (darkMode) {
