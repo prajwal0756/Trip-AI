@@ -1,0 +1,20 @@
+{
+    "accuracy": 0.8,
+    "macro_precision": 0.869047619047619,
+    "macro_recall": 0.8511904761904762,
+    "macro_f1": 0.8340136054421768,
+    "weighted_precision": 0.8566666666666667,
+    "weighted_recall": 0.8,
+    "weighted_f1": 0.8034285714285716,
+    "test_samples": 25,
+    "number_of_classes": 7,
+    "classes": [
+        "accommodation_search",
+        "activity_search",
+        "destination_information",
+        "destination_search",
+        "greeting",
+        "recommendation",
+        "similar_destination"
+    ]
+}

@@ -1,0 +1,57 @@
+{
+    "accommodation_search": {
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "f1-score": 0.8,
+        "support": 3.0
+    },
+    "activity_search": {
+        "precision": 0.5,
+        "recall": 1.0,
+        "f1-score": 0.6666666666666666,
+        "support": 3.0
+    },
+    "destination_information": {
+        "precision": 1.0,
+        "recall": 0.6666666666666666,
+        "f1-score": 0.8,
+        "support": 3.0
+    },
+    "destination_search": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 3.0
+    },
+    "greeting": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 2.0
+    },
+    "recommendation": {
+        "precision": 0.8333333333333334,
+        "recall": 0.625,
+        "f1-score": 0.7142857142857143,
+        "support": 8.0
+    },
+    "similar_destination": {
+        "precision": 0.75,
+        "recall": 1.0,
+        "f1-score": 0.8571428571428571,
+        "support": 3.0
+    },
+    "accuracy": 0.8,
+    "macro avg": {
+        "precision": 0.869047619047619,
+        "recall": 0.8511904761904762,
+        "f1-score": 0.8340136054421768,
+        "support": 25.0
+    },
+    "weighted avg": {
+        "precision": 0.8566666666666667,
+        "recall": 0.8,
+        "f1-score": 0.8034285714285716,
+        "support": 25.0
+    }
+}

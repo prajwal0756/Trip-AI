@@ -584,10 +584,10 @@ class AIPipeline:
                     row["best_season"],
 
                 "estimated_budget_npr":
-                    row["estimated_budget_npr"],
+                    int(row["estimated_budget_npr"]),
 
                 "average_duration_days":
-                    row["average_duration_days"],
+                    int(row["average_duration_days"]),
 
                 "difficulty_level":
                     row["difficulty_level"],
@@ -596,10 +596,10 @@ class AIPipeline:
                     row["family_friendly"],
 
                 "average_rating":
-                    row["average_rating"],
+                    int(row["average_rating"]),
 
                 "review_count":
-                    row["review_count"],
+                    int(row["review_count"]),
 
                 "description":
                     row["description"]

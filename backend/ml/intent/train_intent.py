@@ -1,14 +1,25 @@
 from pathlib import Path
 import json
 import joblib
-
+import os
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report
 from collections import Counter
-
+from sklearn.metrics import (
+    accuracy_score,
+    precision_score,
+    recall_score,
+    f1_score,
+    classification_report,
+    confusion_matrix,
+    ConfusionMatrixDisplay,
+)
+import matplotlib.pyplot as plt
+import seaborn as sns
+from pathlib import Path
 
 # --------------------------------------------------
 # PATHS
@@ -110,25 +121,168 @@ print("Training complete.")
 # EVALUATION
 # --------------------------------------------------
 
-predictions = model.predict(X_test)
+y_pred = model.predict(X_test)
 
-accuracy = accuracy_score(
+
+# =====================================================
+# MODEL EVALUATION
+# =====================================================
+
+accuracy = accuracy_score(y_test, y_pred)
+
+precision_macro = precision_score(
     y_test,
-    predictions
+    y_pred,
+    average="macro",
+    zero_division=0
 )
 
-print(f"\nAccuracy: {accuracy:.4f}")
+recall_macro = recall_score(
+    y_test,
+    y_pred,
+    average="macro",
+    zero_division=0
+)
+
+f1_macro = f1_score(
+    y_test,
+    y_pred,
+    average="macro",
+    zero_division=0
+)
+
+precision_weighted = precision_score(
+    y_test,
+    y_pred,
+    average="weighted",
+    zero_division=0
+)
+
+recall_weighted = recall_score(
+    y_test,
+    y_pred,
+    average="weighted",
+    zero_division=0
+)
+
+f1_weighted = f1_score(
+    y_test,
+    y_pred,
+    average="weighted",
+    zero_division=0
+)
+
+
+print("\n" + "=" * 60)
+print("INTENT CLASSIFICATION EVALUATION")
+print("=" * 60)
+
+print(f"Accuracy           : {accuracy:.4f}")
+print(f"Macro Precision    : {precision_macro:.4f}")
+print(f"Macro Recall       : {recall_macro:.4f}")
+print(f"Macro F1-score     : {f1_macro:.4f}")
+print(f"Weighted Precision : {precision_weighted:.4f}")
+print(f"Weighted Recall    : {recall_weighted:.4f}")
+print(f"Weighted F1-score  : {f1_weighted:.4f}")
+
 
 print("\nClassification Report:")
-
 print(
     classification_report(
         y_test,
-        predictions,
+        y_pred,
+        digits=4,
         zero_division=0
     )
 )
+# =====================================================
+# CONFUSION MATRIX
+# =====================================================
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.metrics import confusion_matrix
+
+# Keep the original class names for the model
+labels = [
+    "accommodation_search",
+    "activity_search",
+    "destination_information",
+    "destination_search",
+    "greeting",
+    "recommendation",
+    "similar_destination"
+]
+
+# Human-readable labels for the figure
+display_labels = [
+    "Accommodation\nSearch",
+    "Activity\nSearch",
+    "Destination\nInformation",
+    "Destination\nSearch",
+    "Greeting",
+    "Recommendation",
+    "Similar\nDestination"
+]
+
+cm = confusion_matrix(y_test, y_pred, labels=labels)
+
+plt.figure(figsize=(12, 9))
+
+ax = sns.heatmap(
+    cm,
+    annot=True,
+    fmt="d",
+    cmap="Blues",
+    xticklabels=display_labels,
+    yticklabels=display_labels,
+    cbar=True,
+    linewidths=0.5,
+    linecolor="white",
+    annot_kws={"size": 14}
+)
+
+plt.title(
+    "Confusion Matrix - TripAI Intent Classification",
+    fontsize=18,
+    fontweight="bold",
+    pad=15
+)
+
+plt.xlabel(
+    "Predicted Intent",
+    fontsize=14,
+    fontweight="bold",
+    labelpad=12
+)
+
+plt.ylabel(
+    "Actual Intent",
+    fontsize=14,
+    fontweight="bold",
+    labelpad=12
+)
+
+plt.xticks(
+    rotation=25,
+    ha="right",
+    fontsize=11
+)
+
+plt.yticks(
+    rotation=0,
+    fontsize=11
+)
+
+plt.tight_layout()
+os.makedirs("evaluation", exist_ok=True)
+plt.savefig(
+    "evaluation/confusion.png",
+    dpi=300,
+    bbox_inches="tight"
+)
+
+plt.close()
 
 # --------------------------------------------------
 # SAVE MODEL
@@ -146,3 +300,8 @@ joblib.dump(
 
 print("\nModel saved to:")
 print(MODEL_PATH)
+
+# =====================================================
+# SAVE METRICS
+# =====================================================
+
