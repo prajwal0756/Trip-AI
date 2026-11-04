@@ -3,7 +3,8 @@ import pickle
 import faiss
 import numpy as np
 from typing import Dict, Any, List
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
+from nlp.model_loader import get_sentence_transformer
 import sys
 import nlp
 try:
@@ -14,7 +15,8 @@ except ModuleNotFoundError:
 class Layer2Semantic:
     def __init__(self):
         # Initialize Sentence Transformer model
-        self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        # self.model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.model = get_sentence_transformer("all-MiniLM-L6-v2")
         
         # Load FAISS index and metadata
         if not os.path.exists(FAISS_INDEX_PATH) or not os.path.exists(FAISS_META_PATH):

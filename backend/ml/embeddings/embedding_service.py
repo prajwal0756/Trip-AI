@@ -3,7 +3,8 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
+from nlp.model_loader import get_sentence_transformer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
@@ -42,11 +43,8 @@ class EmbeddingService:
         # LOAD MODEL
         # --------------------------------------------------
 
-        print("Loading embedding model...")
-
-        self.model = SentenceTransformer(
-            model_name
-        )
+        print("Loading shared embedding model...")
+        self.model = get_sentence_transformer(model_name)
 
         # --------------------------------------------------
         # LOAD EMBEDDINGS
