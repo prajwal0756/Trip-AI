@@ -2,8 +2,8 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 import requests
 
-from ml.ai_pipeline import AIPipeline
-
+# from ml.ai_pipeline import AIPipeline
+from functools import lru_cache
 
 router = APIRouter(
     prefix="/ai",
@@ -15,7 +15,12 @@ router = APIRouter(
 # LOAD AI PIPELINE ONCE
 # =====================================================
 
-pipeline = AIPipeline()
+# pipeline = AIPipeline()
+# Load AI pipeline only when the first recommendation is requested
+@lru_cache(maxsize=1)
+def get_pipeline():
+    from ml.ai_pipeline import AIPipeline
+    return AIPipeline()
 
 
 # =====================================================
@@ -61,9 +66,10 @@ def ai_query(
 
     try:
 
-        result = pipeline.process(
-            query
-        )
+        # result = pipeline.process(
+        #     query
+        # )
+        result = get_pipeline().process(query)
 
         return result
 
