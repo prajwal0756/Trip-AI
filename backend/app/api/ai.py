@@ -120,9 +120,10 @@ def ai_query(request: AIQueryRequest):
         ) from exc
 
     except requests.RequestException as exc:
+        print(f"AI proxy connection error: {type(exc).__name__}: {exc}")
         raise HTTPException(
             status_code=502,
-            detail="AI recommendation service is unavailable.",
+            detail="AI recommendation service is unavailable."
         ) from exc
 
 
