@@ -3,12 +3,16 @@ from pydantic import BaseModel
 import requests
 
 # from ml.ai_pipeline import AIPipeline
-from functools import lru_cache
+# from functools import lru_cache
 
 router = APIRouter(
     prefix="/ai",
     tags=["AI"],
 )
+import os
+
+AI_SERVICE_URL = os.getenv("AI_SERVICE_URL", "").rstrip("/")
+AI_SERVICE_TOKEN = os.getenv("AI_SERVICE_TOKEN", "")
 
 
 # =====================================================
@@ -17,10 +21,10 @@ router = APIRouter(
 
 # pipeline = AIPipeline()
 # Load AI pipeline only when the first recommendation is requested
-@lru_cache(maxsize=1)
-def get_pipeline():
-    from ml.ai_pipeline import AIPipeline
-    return AIPipeline()
+# @lru_cache(maxsize=1)
+# def get_pipeline():
+#     from ml.ai_pipeline import AIPipeline
+#     return AIPipeline()
 
 
 # =====================================================
@@ -51,10 +55,36 @@ class SentimentRequest(BaseModel):
 # AI RECOMMENDATION
 # =====================================================
 
+# @router.post("/query")
+# def ai_query(
+#     request: AIQueryRequest,
+# ):
+
+#     query = request.query.strip()
+
+#     if not query:
+#         raise HTTPException(
+#             status_code=400,
+#             detail="Query cannot be empty",
+#         )
+
+#     try:
+
+#         # result = pipeline.process(
+#         #     query
+#         # )
+#         result = get_pipeline().process(query)
+
+#         return result
+
+#     except Exception as exc:
+
+#         raise HTTPException(
+#             status_code=500,
+#             detail=str(exc),
+#         )
 @router.post("/query")
-def ai_query(
-    request: AIQueryRequest,
-):
+def ai_query(request: AIQueryRequest):
 
     query = request.query.strip()
 
@@ -64,21 +94,36 @@ def ai_query(
             detail="Query cannot be empty",
         )
 
-    try:
-
-        # result = pipeline.process(
-        #     query
-        # )
-        result = get_pipeline().process(query)
-
-        return result
-
-    except Exception as exc:
-
+    if not AI_SERVICE_URL or not AI_SERVICE_TOKEN:
         raise HTTPException(
-            status_code=500,
-            detail=str(exc),
+            status_code=503,
+            detail="AI recommendation service is not configured.",
         )
+
+    try:
+        response = requests.post(
+            f"{AI_SERVICE_URL}/ai/query",
+            json={"query": query},
+            headers={
+                "Authorization": f"Bearer {AI_SERVICE_TOKEN}"
+            },
+            timeout=90,
+        )
+
+        response.raise_for_status()
+        return response.json()
+
+    except requests.Timeout as exc:
+        raise HTTPException(
+            status_code=504,
+            detail="AI recommendation service timed out.",
+        ) from exc
+
+    except requests.RequestException as exc:
+        raise HTTPException(
+            status_code=502,
+            detail="AI recommendation service is unavailable.",
+        ) from exc
 
 
 # =====================================================
