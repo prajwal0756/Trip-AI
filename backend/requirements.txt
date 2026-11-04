@@ -37,3 +37,5 @@ huggingface-hub
 # Utilities
 greenlet
 openpyxl
+
+requests
