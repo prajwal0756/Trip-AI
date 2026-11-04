@@ -39,3 +39,4 @@ greenlet
 openpyxl
 
 requests
+faiss-cpu
